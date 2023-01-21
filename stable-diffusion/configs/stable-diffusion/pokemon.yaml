@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 1.0e-04
+  base_learning_rate: 5.0e-06
   target: ldm.models.diffusion.ddpm.LatentDiffusion
   params:
     linear_start: 0.00085
@@ -72,13 +72,14 @@ model:
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 4
-    num_workers: 4
+    batch_size: 1
+    num_workers: 8
     num_val_workers: 0 # Avoid a weird val dataloader issue
     train:
       target: ldm.data.simple.hf_dataset
       params:
-        name: lambdalabs/pokemon-blip-captions
+        name: soypablo/Emoji_Dataset-Openmoji
+        # name: lambdalabs/pokemon-blip-captions
         image_transforms:
         - target: torchvision.transforms.Resize
           params:
@@ -92,12 +93,12 @@ data:
       target: ldm.data.simple.TextOnly
       params:
         captions:
-        - "A pokemon with green eyes, large wings, and a hat"
         - "A cute bunny rabbit"
+        - "A pokemon with green eyes, large wings, and a hat"
         - "Yoda"
         - "An epic landscape photo of a mountain"
         output_size: 512
-        n_gpus: 2 # small hack to sure we see all our samples
+        n_gpus: 1 # small hack to sure we see all our samples
 
 
 lightning:
@@ -105,9 +106,10 @@ lightning:
 
   modelcheckpoint:
     params:
-      every_n_train_steps: 2000
-      save_top_k: -1
+      #every_n_train_steps: 2000
+      save_top_k: 1
       monitor: null
+      save_on_train_epoch_end : True
 
   callbacks:
     image_logger:
@@ -131,3 +133,4 @@ lightning:
     benchmark: True
     num_sanity_val_steps: 0
     accumulate_grad_batches: 1
+    max_epochs : 100

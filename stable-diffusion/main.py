@@ -27,12 +27,10 @@ MULTINODE_HACKS = False
 def rank_zero_print(*args):
     print(*args)
 
-def modify_weights(w, scale = 1e-6, n=2):
+def modify_weights(w, scale = 1e-6):
     """Modify weights to accomodate concatenation to unet"""
     extra_w = scale*torch.randn_like(w)
-    new_w = w.clone()
-    for i in range(n):
-        new_w = torch.cat((new_w, extra_w.clone()), dim=1)
+    new_w = torch.cat((w, extra_w), dim=1)
     return new_w
 
 
@@ -375,7 +373,7 @@ class ImageLogger(Callback):
             should_log = True
         else:
             should_log = self.check_frequency(check_idx)
-        if (should_log and  (check_idx % self.batch_freq == 0) and
+        if (should_log and  (batch_idx % self.batch_freq == 0) and
                 hasattr(pl_module, "log_images") and
                 callable(pl_module.log_images) and
                 self.max_images > 0):
@@ -602,9 +600,31 @@ if __name__ == "__main__":
     sys.path.append(os.getcwd())
 
     parser = get_parser()
-    parser = Trainer.add_argparse_args(parser)
+    parser = Trainer.add_argparse_args(parser) # return : ArgumentParser
 
     opt, unknown = parser.parse_known_args()
+    # opt : Namespace(accelerator=None, accumulate_grad_batches=1, name= .. 등등의 config 정보)
+    # unknown : '--finetune_from sd-v...l-ema.ckpt'
+    # opt: Namespace(accelerator=None, accumulate_grad_batches=1, amp_backend='native', 
+    # amp_level='O2', auto_lr_find=False, auto_scale_batch_size=False, 
+    # auto_select_gpus=False, base=['stable-diffusion/configs/stable-diffusion/pokemon.yaml']
+    # , benchmark=False, check_val_every_n_epoch=10, checkpoint_callback=True, debug=False,
+    # default_root_dir=None, deterministic=False, devices=None, distributed_backend=None,
+    # fast_dev_run=False, finetune_from='', flush_logs_every_n_steps=100, gpus=1,
+    # gradient_clip_algorithm='norm', gradient_clip_val=0.0, ipus=None, 
+    # limit_predict_batches=1.0, limit_test_batches=1.0, limit_train_batches=1.0,
+    # limit_val_batches=1.0, log_every_n_steps=50, log_gpu_memory=None, logdir='logs',
+    # logger=True, max_epochs=None, max_steps=None, max_time=None, min_epochs=None,
+    # min_steps=None, move_metrics_to_cpu=False, multiple_trainloader_mode='max_size_cycle',
+    # name='', no_test=False, num_nodes=1, num_processes=1, num_sanity_val_steps=2,
+    # overfit_batches=0.0, plugins=None, postfix='',
+    # precision=32, prepare_data_per_node=True, process_position=0,
+    # profiler=None, progress_bar_refresh_rate=None, project=None, 
+    # reload_dataloaders_every_epoch=False, reload_dataloaders_every_n_epochs=0, 
+    # replace_sampler_ddp=True, resume='', resume_from_checkpoint=None, scale_lr=False, 
+    # seed=23, stochastic_weight_avg=False, sync_batchnorm=False, terminate_on_nan=False,
+    # tpu_cores=None, track_grad_norm=-1, train=True, truncated_bptt_steps=None,
+    # val_check_interval=1.0, weights_save_path=None, weights_summary='top')
     if opt.name and opt.resume:
         raise ValueError(
             "-n/--name and -r/--resume cannot be specified both."
@@ -634,42 +654,85 @@ if __name__ == "__main__":
         if opt.name:
             name = "_" + opt.name
         elif opt.base:
+            # opt.base = 'stable-diffusion/configs/stable-diffusion/pokemon.yaml'
             cfg_fname = os.path.split(opt.base[0])[-1]
+            # cfg_fname : 'pokemon.yaml'
             cfg_name = os.path.splitext(cfg_fname)[0]
+            # cfg_name : 'pokemon'
             name = "_" + cfg_name
         else:
             name = ""
         nowname = now + name + opt.postfix
-        logdir = os.path.join(opt.logdir, nowname)
-
+        logdir = os.path.join(opt.logdir, nowname) # logdir : log/년-달-시분초-name(pokemon)
+        # logdir : 'logs/2023-01-21T13-28-14_pokemon'
     ckptdir = os.path.join(logdir, "checkpoints")
+    # ckptdir : 'logs/2023-01-21T13-28-14_pokemon/checkpoints'
     cfgdir = os.path.join(logdir, "configs")
-    seed_everything(opt.seed)
+    # cfgdir : 'logs/2023-01-21T13-28-14_pokemon/configs'
+    seed_everything(opt.seed) 
 
     try:
         # init and save configs
-        configs = [OmegaConf.load(cfg) for cfg in opt.base]
+        # opt.base : yaml 파일 들어있음
+        configs = [OmegaConf.load(cfg) for cfg in opt.base] # dict 형태로 yaml 파일 접근
+        # {'model': {'base_learning_rate': 5e-06, 'target': 'ldm.models.diffusion.ddpm.LatentDiffusion', 
+        # 'params': {'linear_start': 0.00085, 'linear_end': 0.012, 'num_timesteps_cond': 1, 'log_every_t': 200, 
+        # 'timesteps': 1000, 'first_stage_key': 'image', 'cond_stage_key': 'txt', 'image_size': 64, 'channels': 4, 
+        # 'cond_stage_trainable': False, 'conditioning_key': 'crossattn', 'scale_factor': 0.18215, 
+        # 'scheduler_config': {'target': 'ldm.lr_scheduler.LambdaLinearScheduler', 'params': {'warm_up_steps': [1], 
+        # 'cycle_lengths': [10000000000000], 'f_start': [1e-06], 'f_max': [1.0], 'f_min': [1.0]}},
+        # 'unet_config': {'target': 'ldm.modules.diffusionmodules.openaimodel.UNetModel',
+        # 'params': {'image_size': 32, 'in_channels': 4, 'out_channels': 4, 'model_channels': 320,
+        # 'attention_resolutions': [4, 2, 1], 'num_res_blocks': 2, 'channel_mult': [1, 2, 4, 4],
+        # 'num_heads': 8, 'use_spatial_transformer': True, 'transformer_depth': 1, 'context_dim': 768,
+        # 'use_checkpoint': True, 'legacy': False}}, 'first_stage_config': {'target': 'ldm.models.autoencoder.AutoencoderKL',
+        # 'ckpt_path': 'models/first_stage_models/kl-f8/model.ckpt', 'params': {'embed_dim': 4, 'monitor': 'val/rec_loss',
+        # 'ddconfig': {'double_z': True, 'z_channels': 4, 'resolution': 256, 'in_channels': 3, 'out_ch': 3,
+        # 'ch': 128, 'ch_mult': [1, 2, 4, 4], 'num_res_blocks': 2, 'attn_resolutions': [], 'dropout': 0.0},
+        # 'lossconfig': {'target': 'torch.nn.Identity'}}}, 'cond_stage_config': {'target': 'ldm.modules.encoders.modules.FrozenCLIPEmbedder'}}},
+        # 'data': {'target': 'main.DataModuleFromConfig', 'params': {'batch_size': 1, 'num_workers': 8, 'num_val_workers': 0,
+        # 'train': {'target': 'ldm.data.simple.hf_dataset', 'params': {'name': 'soypablo/Emoji_Dataset-Openmoji',
+        # 'image_transforms': [{'target': 'torchvision.transforms.Resize', 'params': {'size': 512, 'interpolation': 3}},
+        # {'target': 'torchvision.transforms.RandomCrop', 'params': {'size': 512}},
+        # {'target': 'torchvision.transforms.RandomHorizontalFlip'}]}},
+        # 'validation': {'target': 'ldm.data.simple.TextOnly',
+        # 'params': {'captions': ['A cute bunny rabbit', 'A pokemon with green eyes, large wings, and a hat', 'Yoda', 'An epic landscape photo of a mountain'],
+        # 'output_size': 512, 'n_gpus': 1}}}}, '--finetune_from sd-v1-4-full-ema': {'ckpt': None}}
         cli = OmegaConf.from_dotlist(unknown)
-        config = OmegaConf.merge(*configs, cli)
-        lightning_config = config.pop("lightning", OmegaConf.create())
+        # cli = "{'--finetune_from sd-v1-4-full-ema': {'ckpt': None}}"
+        config = OmegaConf.merge(*configs, cli) # 결국 config : pokemon.yaml 파일 + cli
+        
+        lightning_config = config.pop("lightning", OmegaConf.create()) # lightning 에 있는 파라미터들만 따로 저장
+        # lightning_config : {'find_unused_parameters': False, 'modelcheckpoint': {'params': {'save_top_k': 1, 'monitor': None, 'save_on_train_epoch_end': True}}, 'callbacks': {'image_logger': {'target': 'main.ImageLogger', 'params': {'batch_frequency': 2000, 'max_images': 4, 'increase_log_steps': False, 'log_first_step': True, 'log_all_val': True, 'log_images_kwargs': {'use_ema_scope': True, 'inpaint': False, 'plot_progressive_rows': False, 'plot_diffusion_rows': False, 'N': 4, 'unconditional_guidance_scale': 3.0, 'unconditional_guidance_label': ['']}}}}, 'trainer': {'benchmark': True, 'num_sanity_val_steps': 0, 'accumulate_grad_batches': 1, 'max_epochs': 100, 'accelerator': 'ddp', 'check_val_every_n_epoch': 10, 'gpus': 1}}
+        
         # merge trainer cli with config
         trainer_config = lightning_config.get("trainer", OmegaConf.create())
+        # trainer_config : {'benchmark': True, 'num_sanity_val_steps': 0, 'accumulate_grad_batches': 1, 'max_epochs': 100}
+        
         # default to ddp
         trainer_config["accelerator"] = "ddp"
+        # trainer_config : trainer_config + {'accelerator': 'ddp'}
+        
         for k in nondefault_trainer_args(opt):
             trainer_config[k] = getattr(opt, k)
+        # trainer_config : trainer_config + {'check_val_every_n_epoch': 10, 'gpus': 1}
+        
         if not "gpus" in trainer_config:
             del trainer_config["accelerator"]
             cpu = True
         else:
-            gpuinfo = trainer_config["gpus"]
-            rank_zero_print(f"Running on GPUs {gpuinfo}")
+            gpuinfo = trainer_config["gpus"] # gpuinfo : 1
+            rank_zero_print(f"Running on GPUs {gpuinfo}") # gpuinfo 를 바로 출력 가능
             cpu = False
         trainer_opt = argparse.Namespace(**trainer_config)
+        # trainer_opt : Namespace(accelerator='ddp', accumulate_grad_batches=1, benchmark=True, check_val_every_n_epoch=10,
+        # gpus=1, max_epochs=100, num_sanity_val_steps=0)
         lightning_config.trainer = trainer_config
+        # lightning_config의 trainer에 trainer_config 추가
 
         # model
         model = instantiate_from_config(config.model)
+        # config.model : {'base_learning_rate': 5e-06, 'target': 'ldm.models.diffusion.ddpm.LatentDiffusion',
         model.cpu()
 
         if not opt.finetune_from == "":
@@ -679,12 +742,11 @@ if __name__ == "__main__":
                 rank_zero_print(f"Found nested key 'state_dict' in checkpoint, loading this instead")
                 old_state = old_state["state_dict"]
 
-            #Check if we need to port weights from 4ch input to 8ch
+            # Check if we need to port weights from 4ch input to 8ch
             in_filters_load = old_state["model.diffusion_model.input_blocks.0.0.weight"]
             new_state = model.state_dict()
             in_filters_current = new_state["model.diffusion_model.input_blocks.0.0.weight"]
-            in_shape = in_filters_current.shape
-            if in_shape != in_filters_load.shape:
+            if in_filters_current.shape != in_filters_load.shape:
                 rank_zero_print("Modifying weights to double number of input channels")
                 keys_to_change = [
                     "model.diffusion_model.input_blocks.0.0.weight",
@@ -692,8 +754,7 @@ if __name__ == "__main__":
                 ]
                 scale = 1e-8
                 for k in keys_to_change:
-                    print("modifying input weights for compatibitlity")
-                    old_state[k] = modify_weights(old_state[k], scale=scale, n=in_shape//4 - 1)
+                    old_state[k] = modify_weights(old_state[k], scale=scale)
 
             m, u = model.load_state_dict(old_state, strict=False)
             if len(m) > 0:
@@ -859,7 +920,7 @@ if __name__ == "__main__":
         # configure learning rate
         bs, base_lr = config.data.params.batch_size, config.model.base_learning_rate
         if not cpu:
-            ngpu = len(lightning_config.trainer.gpus.strip(",").split(','))
+            ngpu = lightning_config.trainer.gpus
         else:
             ngpu = 1
         if 'accumulate_grad_batches' in lightning_config.trainer:
@@ -884,8 +945,11 @@ if __name__ == "__main__":
             # run all checkpoint hooks
             if trainer.global_rank == 0:
                 rank_zero_print("Summoning checkpoint.")
-                ckpt_path = os.path.join(ckptdir, "last.ckpt")
+                ckpt_path = os.path.join("last.ckpt")
+                # [os.remove(f) for f in glob.glob("/opt/ml/stable-diffusion/logs/2023-01-10T13-18-03_pokemon/checkpoints/*.ckpt")]
                 trainer.save_checkpoint(ckpt_path)
+                # ckpt_path = os.path.join(ckptdir, "last.ckpt")
+                # trainer.save_checkpoint(ckpt_path)
 
 
         def divein(*args, **kwargs):
@@ -898,7 +962,7 @@ if __name__ == "__main__":
 
         signal.signal(signal.SIGUSR1, melk)
         signal.signal(signal.SIGUSR2, divein)
-
+        
         # run
         if opt.train:
             try:
