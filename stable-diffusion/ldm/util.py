@@ -77,7 +77,7 @@ def instantiate_from_config(config):
             return None
         raise KeyError("Expected key `target` to instantiate.")
     # config["target"] = ldm.models.diffusion.ddpm.LatentDiffusion
-    print(get_obj_from_str(config["target"]))
+    print('get_obj_from_str(config["target"]) is :',get_obj_from_str(config["target"]))
     return get_obj_from_str(config["target"])(**config.get("params", dict()))
 
 

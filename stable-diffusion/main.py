@@ -4,6 +4,7 @@ import time
 import torch
 import torchvision
 import pytorch_lightning as pl
+import wandb
 
 from packaging import version
 from omegaconf import OmegaConf
@@ -13,6 +14,7 @@ from PIL import Image
 
 from pytorch_lightning import seed_everything
 from pytorch_lightning.trainer import Trainer
+from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, Callback, LearningRateMonitor
 from pytorch_lightning.utilities.distributed import rank_zero_only
 from pytorch_lightning.utilities import rank_zero_info
@@ -366,6 +368,11 @@ class ImageLogger(Callback):
             path = os.path.join(root, filename)
             os.makedirs(os.path.split(path)[0], exist_ok=True)
             Image.fromarray(grid).save(path)
+            wandb.log({
+                "diffusion image": [
+                    wandb.Image(grid)
+                    ]
+                })
 
     def log_img(self, pl_module, batch, batch_idx, split="train"):
         check_idx = batch_idx if self.log_on_batch_idx else pl_module.global_step
@@ -538,7 +545,6 @@ class SingleImageLogger(Callback):
 
             if is_train:
                 pl_module.train()
-
     def check_frequency(self, check_idx):
         if ((check_idx % self.batch_freq) == 0 or (check_idx in self.log_steps)) and (
                 check_idx > 0 or self.log_first_step):
@@ -733,6 +739,7 @@ if __name__ == "__main__":
         # model
         model = instantiate_from_config(config.model)
         # config.model : {'base_learning_rate': 5e-06, 'target': 'ldm.models.diffusion.ddpm.LatentDiffusion',
+        print(model)
         model.cpu()
 
         if not opt.finetune_from == "":
@@ -766,7 +773,7 @@ if __name__ == "__main__":
 
         # trainer and callbacks
         trainer_kwargs = dict()
-
+        
         # default logger configs
         default_logger_cfgs = {
             "wandb": {
@@ -787,13 +794,21 @@ if __name__ == "__main__":
             },
         }
         default_logger_cfg = default_logger_cfgs["testtube"]
+        # default_logger_cfg : {'target': 'pytorch_lightning.lo...TubeLogger', 'params': {'name': 'testtube', 'save_dir': 'logs/2023-01-21T18-4...49_pokemon'}}
         if "logger" in lightning_config:
             logger_cfg = lightning_config.logger
         else:
             logger_cfg = OmegaConf.create()
         logger_cfg = OmegaConf.merge(default_logger_cfg, logger_cfg)
         trainer_kwargs["logger"] = instantiate_from_config(logger_cfg)
-
+        wandb.init(
+            project="Diffusion",
+            entity="mrc_11",
+            name = name,
+            dir="../data/",
+            config=dict(default_logger_cfgs["wandb"])
+            )
+        print('wandb initialized!!!!!!!!!!!!!!!!!')
         # modelcheckpoint - use TrainResult/EvalResult(checkpoint_on=metric) to
         # specify which metric is used to determine best models
         default_modelckpt_cfg = {
@@ -819,6 +834,7 @@ if __name__ == "__main__":
         if version.parse(pl.__version__) < version.parse('1.4.0'):
             trainer_kwargs["checkpoint_callback"] = instantiate_from_config(modelckpt_cfg)
 
+        # trainer = Trainer.add_argparse_args(logger=wandb_logger)
         # add callback which sets up log directory
         default_callbacks_cfg = {
             "setup_callback": {
@@ -852,6 +868,7 @@ if __name__ == "__main__":
             "cuda_callback": {
                 "target": "main.CUDACallback"
             },
+
         }
         if version.parse(pl.__version__) >= version.parse('1.4.0'):
             default_callbacks_cfg.update({'checkpoint_callback': modelckpt_cfg})
