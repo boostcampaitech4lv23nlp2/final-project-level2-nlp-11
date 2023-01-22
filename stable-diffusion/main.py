@@ -607,7 +607,9 @@ if __name__ == "__main__":
 
     parser = get_parser()
     parser = Trainer.add_argparse_args(parser) # return : ArgumentParser
-
+    
+    torch.cuda.empty_cache()
+    
     opt, unknown = parser.parse_known_args()
     # opt : Namespace(accelerator=None, accumulate_grad_batches=1, name= .. 등등의 config 정보)
     # unknown : '--finetune_from sd-v...l-ema.ckpt'
