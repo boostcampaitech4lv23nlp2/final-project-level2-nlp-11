@@ -6,7 +6,7 @@ import re
 import os
 import requests
 
-from share_btn import community_icon_html, loading_icon_html, share_js
+from utils.share_btn import community_icon_html, loading_icon_html, share_js
 
 # word_list_dataset = load_dataset("stabilityai/word-list", data_files="list.txt", use_auth_token=True)
 # word_list = word_list_dataset["train"]['text']
