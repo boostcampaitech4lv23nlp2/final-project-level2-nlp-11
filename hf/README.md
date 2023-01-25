@@ -1,3 +1,4 @@
+# TODO: README 수정, requirements 지속 가능하게 수정 (diffusers 관련)
 chmod 755 lora.sh
 chmode 755 main.sh 필요
 

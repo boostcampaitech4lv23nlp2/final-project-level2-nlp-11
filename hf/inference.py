@@ -8,7 +8,7 @@ model_path = "models/emoji-model"
 test_model_path = "Norod78/sd15-fluentui-emoji"
 pipe = StableDiffusionPipeline.from_pretrained(test_model_path, torch_dtype=torch.float16)
 pipe.to("cuda")
-prompt = "a patient in a red hat walking around the hallway with a cast on his leg color"
+prompt = "Miner with Head Lantern"
 outputs = pipe(prompt=prompt, guidance_scale=5, num_images_per_prompt=4)
 # outputs.images[0].save(f"outputs/{prompt[:10]}4.png")
 

@@ -14,6 +14,9 @@
 # limitations under the License.
 """Fine-tuning script for Stable Diffusion for text2image with support for LoRA."""
 
+# TODO: __call__ 의 validation prompt 관련 인자 list로 넣을 수 있게 하기. wandb에도 적용되어야 함. (main.py도 같이 수정)
+
+
 import argparse
 import logging
 import math
