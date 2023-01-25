@@ -13,6 +13,7 @@ lr_scheduler: cosine
 lr_warmup_steps: 0
 seed: 42
 validation_file: ../config/validation_prompt.txt #lora.py에서의 상대경로.
+validation_prompt: "a cute bunny rabbit"
 report_to: wandb
 hub_model_id: soypablo/emoji-model-finetuned-lora
 gradient_checkpointing: True
