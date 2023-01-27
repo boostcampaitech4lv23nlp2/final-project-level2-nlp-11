@@ -41,6 +41,7 @@ from diffusers import (
     AutoencoderKL,
     DDPMScheduler,
     DiffusionPipeline,
+    StableDiffusionPipeline,
     UNet2DConditionModel,
 )
 from diffusers.loaders import AttnProcsLayers
@@ -53,7 +54,6 @@ from torchvision import transforms
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from omegaconf import OmegaConf
-
 
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.
 check_min_version("0.12.0.dev0")
@@ -737,7 +737,8 @@ def main():
     # We need to initialize the trackers we use, and also store our configuration.
     # The trackers initializes automatically on the main process.
     if accelerator.is_main_process:
-        accelerator.init_trackers("text2image-fine-tune", config=vars(args))
+        accelerator.init_trackers(args.wandb_project_name , config=vars(args), 
+        init_kwargs={"wandb":{"name": args.wandb_run_name, "entity" : "we-fusion-klue" }} )
 
     # Train!
     total_batch_size = (
@@ -757,6 +758,7 @@ def main():
     logger.info(f"  Total optimization steps = {args.max_train_steps}")
     global_step = 0
     first_epoch = 0
+
 
     # Potentially load in the weights and states from a previous save
     if args.resume_from_checkpoint:
@@ -860,12 +862,59 @@ def main():
                 train_loss = 0.0
 
                 if global_step % args.checkpointing_steps == 0:
+
                     if accelerator.is_main_process:
                         save_path = os.path.join(
                             args.output_dir, f"checkpoint-{global_step}"
                         )
                         accelerator.save_state(save_path)
                         logger.info(f"Saved state to {save_path}")
+                    
+                    if args.validation_prompt is not None :
+                        logger.info(
+                            f"Running validation... \n Generating {args.num_validation_images} images with prompt:"
+                            f" {args.validation_prompt}."
+                        )
+                        # create pipeline
+                        pipeline = StableDiffusionPipeline.from_pretrained(
+                            args.pretrained_model_name_or_path,
+                            unet=accelerator.unwrap_model(unet),
+                            revision=args.revision,
+                            torch_dtype=weight_dtype,
+                        )
+                        pipeline = pipeline.to(accelerator.device)
+                        pipeline.set_progress_bar_config(disable=True)
+
+                        # run inference
+                        generator = torch.Generator(device=accelerator.device).manual_seed(
+                            args.seed
+                        )
+                        images = []
+                        for _ in range(args.num_validation_images):
+                            images.append(
+                                pipeline(
+                                    args.validation_prompt,
+                                    num_inference_steps=30,
+                                    generator=generator,
+                                ).images[0]
+                            )
+
+                        if accelerator.is_main_process:
+                            for tracker in accelerator.trackers:
+                                if tracker.name == "wandb":
+                                    tracker.log(
+                                        {
+                                            "validation": [
+                                                wandb.Image(
+                                                    image, caption=f"{i}: {args.validation_prompt}"
+                                                )
+                                                for i, image in enumerate(images)
+                                            ]
+                                        }
+                                    )
+
+                        del pipeline
+                        torch.cuda.empty_cache()
 
             logs = {
                 "step_loss": loss.detach().item(),
@@ -876,54 +925,9 @@ def main():
             if global_step >= args.max_train_steps:
                 break
 
-        if args.validation_prompt is not None and epoch % args.validation_epochs == 0:
-            logger.info(
-                f"Running validation... \n Generating {args.num_validation_images} images with prompt:"
-                f" {args.validation_prompt}."
-            )
-            # create pipeline
-            pipeline = DiffusionPipeline.from_pretrained(
-                args.pretrained_model_name_or_path,
-                unet=accelerator.unwrap_model(unet),
-                revision=args.revision,
-                torch_dtype=weight_dtype,
-            )
-            pipeline = pipeline.to(accelerator.device)
-            pipeline.set_progress_bar_config(disable=True)
-
-            # run inference
-            generator = torch.Generator(device=accelerator.device).manual_seed(
-                args.seed
-            )
-            images = []
-            for _ in range(args.num_validation_images):
-                images.append(
-                    pipeline(
-                        args.validation_prompt,
-                        num_inference_steps=30,
-                        generator=generator,
-                    ).images[0]
-                )
-
-            if accelerator.is_main_process:
-                for tracker in accelerator.trackers:
-                    if tracker.name == "wandb":
-                        tracker.log(
-                            {
-                                "validation": [
-                                    wandb.Image(
-                                        image, caption=f"{i}: {args.validation_prompt}"
-                                    )
-                                    for i, image in enumerate(images)
-                                ]
-                            }
-                        )
-
-            del pipeline
-            torch.cuda.empty_cache()
-
     # Save the lora layers
     accelerator.wait_for_everyone()
+
     if accelerator.is_main_process:
         unet = unet.to(torch.float32)
         unet.save_attn_procs(args.output_dir)
