@@ -1,6 +1,6 @@
-from diffusers import StableDiffusionPipeline, UNet2DConditionModel
+from diffusers import StableDiffusionPipeline
 import torch
-from accelerate import Accelerator
+
 
 torch.cuda.empty_cache()
 model_path = "stabilityai/stable-diffusion-2-1-base"
@@ -13,6 +13,6 @@ pipe = StableDiffusionPipeline.from_pretrained(
 pipe.unet.load_attn_procs(ckpt_path)
 pipe.to("cuda")
 
-prompt = "Cute rabbit wearing a blue hat and eating a carrot"
-image = pipe(prompt=prompt, guidance_scale=7.5).images[0]
+prompt = "cute green bird"
+image = pipe(prompt=prompt, guidance_scale=10, num_inference_steps=25).images[0]
 image.save(f"outputs/{prompt[:10]}10.png")
