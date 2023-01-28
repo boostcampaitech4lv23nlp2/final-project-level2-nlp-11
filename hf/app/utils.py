@@ -20,7 +20,6 @@ def generation_image(prompt : str,
     pipe.unet.load_attn_procs(model_path)
 
     pipe.to("cuda")
-    prompt = "a cute bunny rabbit"
 
     output_image = []
     for i in range(num_inference) :
