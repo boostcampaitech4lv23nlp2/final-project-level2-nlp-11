@@ -2,7 +2,7 @@ mixed_precision: fp16
 pretrained_model_name_or_path: runwayml/stable-diffusion-v1-5 #stabilityai/stable-diffusion-2-1-base
 dataset_name: soypablo/Emoji_Dataset-Openmoji #soypablo/Emoji_Dataset-Openmoji-BLIP
 caption_column: text
-output_dir: models/test-config-upgrade
+output_dir: models/2-1-base-test-inference
 resolution: 512
 train_batch_size: 2
 gradient_accumulation_steps: 2
@@ -19,5 +19,5 @@ report_to: wandb
 gradient_checkpointing: True
 random_flip: True
 #push_to_hub: True
-wandb_project_name : sangsu_test
-wandb_run_name : lora
+wandb_project_name: sangsu_test
+wandb_run_name: lora

@@ -868,6 +868,8 @@ def main():
                             args.output_dir, f"checkpoint-{global_step}"
                         )
                         accelerator.save_state(save_path)
+                        # add unet.savefile
+                        unet.save_attn_procs(save_path)
                         logger.info(f"Saved state to {save_path}")
                     
                     if args.validation_prompt is not None :
