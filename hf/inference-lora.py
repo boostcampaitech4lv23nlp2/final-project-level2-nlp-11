@@ -12,7 +12,6 @@ pipe = StableDiffusionPipeline.from_pretrained(
 )
 pipe.unet.load_attn_procs(ckpt_path)
 pipe.to("cuda")
-
-prompt = "cute green bird"
-image = pipe(prompt=prompt, guidance_scale=10, num_inference_steps=25).images[0]
-image.save(f"outputs/{prompt[:10]}10.png")
+prompt = "Cute rabbit wearing a blue hat and eating a carrot"
+image = pipe(prompt=prompt, guidance_scale=15.0).images[0]
+image.save(f"outputs/{prompt[:10]}3.png")
