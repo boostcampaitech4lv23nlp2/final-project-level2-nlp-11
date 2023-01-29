@@ -1,0 +1,17 @@
+service: "service.py:svc"
+include:
+    - "service.py"
+    - "requirements.txt"
+    - "./models/2-1-base-test-inference"
+    - "configuration.yaml"
+python:
+    packages:
+        - torch
+        - transformers
+        - diffusers
+        - ftfy
+docker:
+    distro: debian
+    cuda_version: "11"
+    env:
+        BENTOML_CONFIG: "src/configuration.yaml"
