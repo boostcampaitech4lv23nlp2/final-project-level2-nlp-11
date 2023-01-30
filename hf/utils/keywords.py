@@ -1,10 +1,11 @@
 import os
+import re
 
 # Path to the folder containing the files
 DATA_DIR = 'datasets/noto_sans/train'
 
 # List of keywords to remove from file names
-keywords = ['fitzpatrick', 'type-1-2', 'type-3','type-4','type-5','type-6','emoji', 'modifier', 'zero width', 'joiner']
+keywords = ['fitzpatrick', 'type-1-2', 'type-3','type-4','type-5','type-6','emoji', 'modifier', 'zero width', 'joiner', 'component']
 blacklist = ['fitzpatrick']
 
 # Create an empty dictionary to store the used names
@@ -15,13 +16,14 @@ erased_files = set()
 
 # Iterate over all the files in the folder
 for file_name in os.listdir(DATA_DIR):
-    # Get the base name of the file (without the file extension)
     base_name, file_ext = os.path.splitext(file_name)
-    # Remove the keywords from the file name
-    # TODO: zero width와 같은 띄어진 키워드는 split으로 인해 검출이 되지 않습니다.
-    new_base_name = ' '.join([word for word in base_name.split() if word not in keywords])
-    # Build the new file name
-    new_file_name = new_base_name + file_ext
+    for keyword in keywords:
+        # Compile a regular expression pattern for the keyword
+        pattern = re.compile(r"\b" + keyword + r"\b")
+        # Replace the keyword with an empty string
+        base_name = pattern.sub("", base_name)
+    new_file_name = base_name + file_ext
+    new_file_name = new_file_name.replace("  ", " ")
     # Check if the new file name already exists in the dictionary
     if new_file_name in used_names:
         # if it does, add a suffix (1) to the file name
