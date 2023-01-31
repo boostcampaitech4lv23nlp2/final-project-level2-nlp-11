@@ -5,3 +5,4 @@ models/
 outputs/
 __pycache__/
 config/
+datasets/
