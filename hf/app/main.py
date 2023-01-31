@@ -1,3 +1,5 @@
+import torch
+
 from fastapi import FastAPI, Body
 from fastapi.responses import JSONResponse
 
@@ -8,8 +10,16 @@ from typing import List, Union , Dict, Any, Optional
 from fastapi.param_functions import Depends
 from app.utils import generation_image, image_to_byte
 from datetime import datetime
+from diffusers import StableDiffusionPipeline
 
 app = FastAPI()
+pretrained_model = 'runwayml/stable-diffusion-v1-5'
+model_path = "models/emoji-model-lora"
+
+pipe = StableDiffusionPipeline.from_pretrained(pretrained_model, torch_dtype=torch.float16)
+pipe.unet.load_attn_procs(model_path)
+
+pipe.to("cuda")
 
 @app.get("/")
 def hello_world() :
@@ -48,7 +58,9 @@ async def make_image(data: Product = Body(...)) :
     inference_step = data.dict()['inference_step']
     resize = data.dict()['resize']
 
+    # TODO: pipe load와 inference를 분리해서 함수로 만들기
     image_list = generation_image(
+        pipe= pipe,
         prompt=prompt,
         guidance_scale = guidance_scale,
         num_inference = num_inference,

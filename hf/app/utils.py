@@ -6,23 +6,16 @@ import random
 import io
 import base64
 
-def generation_image(prompt : str,
+def generation_image(pipe,
+                prompt : str,
                 guidance_scale : int,
                 num_inference : int,
                 inference_step : int,
                 resize : int 
                 ) -> List :
 
-    pretrained_model = 'runwayml/stable-diffusion-v1-5'
-    model_path = "models/emoji-model-lora"
-    
-    pipe = StableDiffusionPipeline.from_pretrained(pretrained_model, torch_dtype=torch.float16)
-    pipe.unet.load_attn_procs(model_path)
-
-    pipe.to("cuda")
-
     output_image = []
-    for i in range(num_inference) :
+    for i in range(num_inference):
         generator = torch.Generator("cuda").manual_seed(random.randint(0,1024))
         image = pipe(prompt=prompt, guidance_scale=guidance_scale, num_inference_steps= inference_step, generator=generator).images[0]
         image = image.resize((resize,resize))
@@ -32,7 +25,7 @@ def generation_image(prompt : str,
 def image_to_byte(image_list : List ) -> List :
     
     decode_image_list = []
-    for idx , image in enumerate(image_list) :
+    for idx , image in enumerate(image_list):
         imgByteArr = io.BytesIO()
         image.save(imgByteArr, format = 'png')
         imgByteArr = imgByteArr.getvalue()
