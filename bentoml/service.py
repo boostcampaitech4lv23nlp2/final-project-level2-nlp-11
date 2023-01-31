@@ -6,6 +6,7 @@ from diffusers import StableDiffusionPipeline
 
 import bentoml
 from bentoml.io import Image, JSON, Multipart
+from pydantic import BaseModel
 
 
 class StableDiffusionRunnable(bentoml.Runnable):
@@ -22,16 +23,7 @@ class StableDiffusionRunnable(bentoml.Runnable):
         )
         txt2img_pipe.unet.load_attn_procs(ckpt_path)
         self.txt2img_pipe = txt2img_pipe.to(self.device)
-        # img to img pipeline setting
-        # self.img2img_pipe = StableDiffusionImg2ImgPipeline(
-        #     vae=self.txt2img_pipe.vae,
-        #     text_encoder=self.txt2img_pipe.text_encoder,
-        #     tokenizer=self.txt2img_pipe.tokenizer,
-        #     unet=self.txt2img_pipe.unet,
-        #     scheduler=self.txt2img_pipe.scheduler,
-        #     safety_checker=self.txt2img_pipe.safety_checker,
-        #     feature_extractor=txt2img_pipe.feature_extractor,
-        # ).to(self.device)
+
 
     @bentoml.Runnable.method(batchable=False, batch_dim=0)
     def txt2img(self, input_data):
@@ -50,35 +42,6 @@ class StableDiffusionRunnable(bentoml.Runnable):
             ).images
             image = images[0]
             return image
-
-
-# img to img method
-# @bentoml.Runnable.method(batchable=False, batch_dim=0)
-# def img2img(self, init_image, data):
-#     new_size = None
-#     longer_side = max(*init_image.size)
-#     if longer_side > 512:
-#         new_size = (512, 512)
-#     elif init_image.width != init_image.height:
-#         new_size = (longer_side, longer_side)
-
-#     if new_size:
-#         init_image =init_image.resize(new_size)
-
-#     prompt = data["prompt"]
-#     strength = data.get('strength', 0.8)
-#     guidance_scale = data.get('guidance_scale', 7.5)
-#     num_inference_steps = data.get('num_inference_steps', 50)
-#     with autocast(self.device):
-#         images = self.img2img_pipe(
-#             prompt=prompt,
-#             init_image=init_image,
-#             strength=strength,
-#             guidance_scale=guidance_scale,
-#             num_inference_steps=num_inference_steps,
-#         ).images
-#         image = images[0]
-#         return image
 
 
 stable_diffusion_runner = bentoml.Runner(
