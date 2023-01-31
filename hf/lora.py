@@ -156,6 +156,12 @@ def parse_args():
         help="A prompt that is sampled during training for inference.",
     )
     parser.add_argument(
+        "--validation_prompt_path",
+        type=str,
+        default=None,
+        help="A path to load validation prompt.",
+    )
+    parser.add_argument(
         "--num_validation_images",
         type=int,
         default=4,
@@ -737,8 +743,13 @@ def main():
     # We need to initialize the trackers we use, and also store our configuration.
     # The trackers initializes automatically on the main process.
     if accelerator.is_main_process:
-        accelerator.init_trackers(args.wandb_project_name , config=vars(args), 
-        init_kwargs={"wandb":{"name": args.wandb_run_name, "entity" : "we-fusion-klue" }} )
+        accelerator.init_trackers(
+            args.wandb_project_name,
+            config=vars(args),
+            init_kwargs={
+                "wandb": {"name": args.wandb_run_name, "entity": "we-fusion-klue"}
+            },
+        )
 
     # Train!
     total_batch_size = (
@@ -758,7 +769,6 @@ def main():
     logger.info(f"  Total optimization steps = {args.max_train_steps}")
     global_step = 0
     first_epoch = 0
-
 
     # Potentially load in the weights and states from a previous save
     if args.resume_from_checkpoint:
@@ -868,9 +878,64 @@ def main():
                             args.output_dir, f"checkpoint-{global_step}"
                         )
                         accelerator.save_state(save_path)
+                        # add unet.savefile
+                        unet.save_attn_procs(save_path)
                         logger.info(f"Saved state to {save_path}")
-                    
-                    if args.validation_prompt is not None :
+                    # validation multi-prompt load from args.validation_prompt_path
+                    if args.validation_prompt_path is not None:
+                        logger.info(
+                            f"Running validation... \n Generating {args.num_validation_images} images with prompt:"
+                            f"load from {args.validation_prompt_path}."
+                        )
+                        # create pipeline
+                        pipeline = StableDiffusionPipeline.from_pretrained(
+                            args.pretrained_model_name_or_path,
+                            unet=accelerator.unwrap_model(unet),
+                            revision=args.revision,
+                            torch_dtype=weight_dtype,
+                        )
+                        pipeline = pipeline.to(accelerator.device)
+                        pipeline.set_progress_bar_config(disable=True)
+
+                        # run inference
+                        generator = torch.Generator(
+                            device=accelerator.device
+                        ).manual_seed(args.seed)
+                        images = {}
+                        with open(args.validation_prompt_path, "r") as prompt_file:
+                            for prompt in prompt_file.readlines():
+                                prompt = prompt.rstrip()
+                                images[prompt] = []
+                                logger.info(f"prompt:{prompt}")
+                                for _ in range(args.num_validation_images):
+                                    images[prompt].append(
+                                        pipeline(
+                                            prompt.rstrip(),
+                                            num_inference_steps=30,
+                                            generator=generator,
+                                        ).images[0]
+                                    )
+
+                        if accelerator.is_main_process:
+                            for tracker in accelerator.trackers:
+                                if tracker.name == "wandb":
+                                    tracker.log(
+                                        {
+                                            f"validation:{prompt}": [
+                                                wandb.Image(
+                                                    image,
+                                                    caption=f"{i}",
+                                                )
+                                                for i, image in enumerate(img_list)
+                                            ]
+                                            for prompt, img_list in images.items()
+                                        }
+                                    )
+
+                        del pipeline
+                        torch.cuda.empty_cache()
+
+                    elif args.validation_prompt is not None:
                         logger.info(
                             f"Running validation... \n Generating {args.num_validation_images} images with prompt:"
                             f" {args.validation_prompt}."
@@ -886,9 +951,9 @@ def main():
                         pipeline.set_progress_bar_config(disable=True)
 
                         # run inference
-                        generator = torch.Generator(device=accelerator.device).manual_seed(
-                            args.seed
-                        )
+                        generator = torch.Generator(
+                            device=accelerator.device
+                        ).manual_seed(args.seed)
                         images = []
                         for _ in range(args.num_validation_images):
                             images.append(
@@ -906,7 +971,8 @@ def main():
                                         {
                                             "validation": [
                                                 wandb.Image(
-                                                    image, caption=f"{i}: {args.validation_prompt}"
+                                                    image,
+                                                    caption=f"{i}: {args.validation_prompt}",
                                                 )
                                                 for i, image in enumerate(images)
                                             ]

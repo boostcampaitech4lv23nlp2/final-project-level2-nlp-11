@@ -4,5 +4,6 @@ wandb
 models/
 outputs/
 __pycache__/
+datasets/
 config/
 datasets/

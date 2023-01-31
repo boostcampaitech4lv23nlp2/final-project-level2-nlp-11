@@ -1,29 +1,24 @@
 import os
 import re
 
-# Path to the folder containing the files
-DATA_DIR = 'datasets/noto_sans/train'
-
 # List of keywords to remove from file names
 keywords = ['fitzpatrick', 'type-1-2', 'type-3','type-4','type-5','type-6','emoji', 'modifier', 'zero width', 'joiner', 'component']
 blacklist = ['fitzpatrick']
 
 # Create an empty dictionary to store the used names
 used_names = {}
-# Create an empty set to store the unique file names
-unique_files = set()
-erased_files = set()
+
+file_names = ["zero width apple.png", "component a.png"]
 
 # Iterate over all the files in the folder
-for file_name in os.listdir(DATA_DIR):
-    base_name, file_ext = os.path.splitext(file_name)
+for file_name in file_names:
     for keyword in keywords:
         # Compile a regular expression pattern for the keyword
         pattern = re.compile(r"\b" + keyword + r"\b")
         # Replace the keyword with an empty string
-        base_name = pattern.sub("", base_name)
-    new_file_name = base_name + file_ext
-    new_file_name = new_file_name.replace("  ", " ")
+        file_name = pattern.sub("", file_name)
+    new_file_name = file_name
+    print(new_file_name)
     # Check if the new file name already exists in the dictionary
     if new_file_name in used_names:
         # if it does, add a suffix (1) to the file name
@@ -34,7 +29,7 @@ for file_name in os.listdir(DATA_DIR):
         # if it does not, add the file name to the dictionary with a value of 1
         used_names[new_file_name] = 1
     # Rename the file
-    os.rename(os.path.join(DATA_DIR, file_name), os.path.join(DATA_DIR, new_file_name))
+    print(file_names)
     
     
 # # Iterate over all the files in the folder
