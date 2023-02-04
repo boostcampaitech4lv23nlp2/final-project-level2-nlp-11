@@ -4,4 +4,7 @@ wandb
 models/
 outputs/
 __pycache__/
+datasets/
 config/
+config/
+config/cfg_lora.yaml
