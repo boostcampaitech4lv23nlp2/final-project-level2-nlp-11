@@ -65,7 +65,7 @@ class StableDiffusionRunnable(bentoml.Runnable):
             input_data (JSON): 유저의 인풋입니다.
 
         Returns:
-            JSON: base64형태로 포매팅된 이미지가 담긴 JSON을 리턴합니다.
+            JSON: base64형태로 인코딩된 이미지정보가 담긴 JSON을 리턴합니다.
         """
         global server_check
         # server_check = 0
