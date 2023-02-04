@@ -3,10 +3,12 @@ import io
 import base64
 import requests
 import streamlit_nested_layout
+from streamlit_image_select import image_select
+
 from PIL import Image
+from rembg import remove
 
 st.set_page_config(page_title="Text-to-Emoji",layout="wide")
-
 
 def main() :
     left, right = st.columns([4, 1])
@@ -27,30 +29,21 @@ def main() :
         st.session_state['inference_step'] = None
     if "save_prameter" not in st.session_state : 
         st.session_state['save_prameter'] = {}
+    if "model_select" not in st.session_state :
+        st.session_state['model_select'] = ""
+    if "remove_bg" not in st.session_state :
+        st.session_state['remove_bg'] = False
     
-    #512 512 columns 4
-    #256 256 columns 4
-    #128 128 columns 8
-    #64 64 columns 16
-    image_reize_dict = {
-        "64" : 16,
-        "128" : 8,
-        "256" : 4,
-        "512" : 4,
-        }
-    
-    size_column = image_reize_dict[''.join(str(st.session_state.output_size))]
-
     with left :
-        st.subheader("Text-to-Emoji")
+        st.markdown("## Text-to-Emoji")
 
         with st.form(key="my_form", clear_on_submit=True):
             col1, col2 = st.columns([8, 1])
 
             with col1:
                 st.text_input(
-                    "a cute buddy rabbit",
-                    placeholder="a cute buddy rabbit",
+                    "",
+                    placeholder="",
                     key="prompt",
                     label_visibility="collapsed",
                 )
@@ -60,76 +53,127 @@ def main() :
                     st.session_state.submit = True
         
         if st.session_state.submit :
+
             data = {
                 "prompt": st.session_state.prompt,
                 "guidance_scale":  st.session_state.guidance_scale,
-                "num_inference":  st.session_state.num_inference,
-                "inference_step":  st.session_state.inference_step,
-                "resize":  st.session_state.output_size
+                "num_images_per_prompt":  st.session_state.num_inference,
+                "num_inference_steps":  st.session_state.inference_step,
+                "size":  st.session_state.output_size
                 }
             
             print(data)
+            
             st.session_state.save_parameter = data
 
-            response = requests.post( "http://localhost:6026/submit",json= data)
+            response = requests.post( "http://118.67.133.216:30001/eng_submit",json= data)
 
-            image_byte_list = response.json()['products']['image_list']
+            image_byte_list = list(response.json().values())
+
             decode_image_list = [Image.open(io.BytesIO(base64.b64decode(image))) for image in image_byte_list ]
-            # image1 = Image.open('../outputs/Cute rabbi3.png')
-            size_column = image_reize_dict[''.join(str(st.session_state.output_size))]
             st.session_state['image_list'] = decode_image_list
-
-            cols = st.columns(size_column)
-
-            for idx , image in enumerate(st.session_state['image_list']) :
-                cols[idx%size_column].image(image, use_column_width="auto")
-
+            st.session_state['remove_bg_image_list'] = [remove(image) for image in decode_image_list]
+            
             st.session_state.submit = False
+            st.session_state['remove_bg'] = False
+                
+        if st.session_state['image_list'] :
+            
+            st.markdown("#### Show Generation Image")
 
-        else :
-            if st.session_state['image_list'] :
-                output_size = st.session_state.save_parameter['resize']
-                size_column = image_reize_dict[''.join(str(output_size))]
-                cols = st.columns(size_column)
+            img_index = image_select(
+                label="",
+                images= st.session_state['image_list'],
+                use_container_width = 10,
+                return_value = "index" 
+            )
+            print(img_index)
+            
+            st.write('###')
+            st.markdown("#### Select Image!")
 
-                for idx , image in enumerate(st.session_state['image_list']) :
-                    cols[idx%size_column].image(image, use_column_width="auto")
+            with st.container() :
+                image_col1 , image_col2 = st.columns([4,1])
 
+                print(image_col1.id)
+                
+                with image_col1 :
+                    st.markdown(
+                        """
+                        <style>
+                            [data-testid=stImage]{
+                                text-align: center;
+                                display: block;
+                                margin-left: auto;
+                                margin-right: auto;
+                                width: 100%;
+                            }
+                        </style>
+                        """, unsafe_allow_html=True)
+                    if st.session_state["remove_bg"] :
+                        st.image(st.session_state['remove_bg_image_list'][img_index], use_column_width="auto")
+                        img = st.session_state['remove_bg_image_list'][img_index]
+                    else :
+                        st.image(st.session_state['image_list'][img_index], use_column_width="auto")
+                        img = st.session_state['image_list'][img_index]
+    
+                with image_col2 :
+                    buf = io.BytesIO()
+                    img.save(buf, format = "PNG")
+                    buf_img = buf.getvalue()
+
+                    btn = st.download_button(
+                        label="Download image",
+                        data= buf_img,
+                        file_name = 'generation_image.png',
+                        mime="image/png",
+                        )
+                    
+                    st.markdown("##")
+                    st.markdown("###### Remove Background")
+                    remove_bg = st.radio("", (False, True), label_visibility="collapsed")
+                    if remove_bg != st.session_state['remove_bg'] :
+                        st.session_state['remove_bg'] = remove_bg
+                        st.experimental_rerun()
+
+                    
+                    # st.button("remove_background", on_click = )
+                    
 
             
     with right :
 
-        output_option = st.selectbox(
-            "output_size",
-            ("128","256","512")
+        st.markdown("##### model select")
+        model_select = st.selectbox(
+            "model select",
+            ("English",
+            "한국어",),
+            label_visibility="collapsed"
         )
-        st.write(output_option)
+        
         st.markdown("##")
 
-        model_option = st.selectbox(
-                "Select Model",
-                ("stable_diffusion_v1-5", "stable_diffusion_v2-1"),
-                label_visibility = "visible",
-            )
-
-        st.write(model_option)
+        st.markdown("##### image size")
+        output_option = st.selectbox(
+            "image size",
+            ("512","256","128"),
+            label_visibility= "collapsed"
+        )
         st.markdown("##")
 
-        num_inference = st.slider("",0,8,4,label_visibility="hidden")
-        st.write(f'num_inference : {num_inference}')
+        st.markdown("##### output count")
+        num_inference = st.slider("output count",1,4,3,label_visibility="collapsed")
         st.markdown("##")
 
-        guidance_scale = st.slider("",0, 100, 20, label_visibility="hidden")
-        st.write(f'cfg_scale : {guidance_scale}')
+        st.markdown("##### cfg scale")
+        guidance_scale = st.slider("cfg scale",0, 50, 10,label_visibility="collapsed")
         st.markdown("##")
 
-        inference_step = st.slider("",0, 100, 30, label_visibility="hidden")
-        st.write(f'inference_step : {inference_step}')
-
+        st.session_state['model_select'] = model_select
         st.session_state['output_size'] = int(output_option)
         st.session_state['num_inference'] = int(num_inference)
         st.session_state['guidance_scale'] = int(guidance_scale)
-        st.session_state['inference_step'] = int(inference_step)
+        st.session_state['inference_step'] = 30
     
 if __name__ == "__main__" :
     main()
