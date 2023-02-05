@@ -13,6 +13,7 @@ from fastapi import FastAPI, Response
 import base64
 from io import BytesIO
 from typing import Optional
+from rembg import remove
 
 server_check = 0
 fastapi_app = FastAPI()
@@ -98,7 +99,8 @@ class StableDiffusionRunnable(bentoml.Runnable):
         # server_check = 1 <- this is code(서버가 사용가능함으로 전환.)
         #
         return {
-            i: to_base64(image.resize((size, size))) for i, image in enumerate(images)
+            i: to_base64(remove(image.resize((size, size))))
+            for i, image in enumerate(images)
         }
 
 
