@@ -42,8 +42,8 @@ def main() :
 
             with col1:
                 st.text_input(
-                    "",
-                    placeholder="",
+                    " ",
+                    value = st.session_state.prompt,
                     key="prompt",
                     label_visibility="collapsed",
                 )
@@ -55,7 +55,7 @@ def main() :
         if st.session_state.submit :
 
             data = {
-                "prompt": st.session_state.prompt,
+                "prompt": st.session_state.prompt ,
                 "guidance_scale":  st.session_state.guidance_scale,
                 "num_images_per_prompt":  st.session_state.num_inference,
                 "num_inference_steps":  st.session_state.inference_step,
@@ -68,11 +68,14 @@ def main() :
 
             response = requests.post( "http://118.67.133.216:30001/eng_submit",json= data)
 
-            image_byte_list = list(response.json().values())
+            image_byte_list = response.json()["images"]
+            remove_image_byte_list = response.json()["removes"]
 
             decode_image_list = [Image.open(io.BytesIO(base64.b64decode(image))) for image in image_byte_list ]
+            remove_decode_image_list = [Image.open(io.BytesIO(base64.b64decode(image))) for image in remove_image_byte_list ]
+           
             st.session_state['image_list'] = decode_image_list
-            st.session_state['remove_bg_image_list'] = [remove(image) for image in decode_image_list]
+            st.session_state['remove_bg_image_list'] = remove_decode_image_list
             
             st.session_state.submit = False
             st.session_state['remove_bg'] = False
@@ -80,14 +83,12 @@ def main() :
         if st.session_state['image_list'] :
             
             st.markdown("#### Show Generation Image")
-
             img_index = image_select(
                 label="",
                 images= st.session_state['image_list'],
                 use_container_width = 10,
                 return_value = "index" 
             )
-            print(img_index)
             
             st.write('###')
             st.markdown("#### Select Image!")
@@ -162,11 +163,11 @@ def main() :
         st.markdown("##")
 
         st.markdown("##### output count")
-        num_inference = st.slider("output count",1,4,3,label_visibility="collapsed")
+        num_inference = st.slider(" ",1,4,3,label_visibility="collapsed")
         st.markdown("##")
 
         st.markdown("##### cfg scale")
-        guidance_scale = st.slider("cfg scale",0, 50, 10,label_visibility="collapsed")
+        guidance_scale = st.slider(" ",0, 50, 10,label_visibility="collapsed")
         st.markdown("##")
 
         st.session_state['model_select'] = model_select
