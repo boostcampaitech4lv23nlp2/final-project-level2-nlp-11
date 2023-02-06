@@ -1,0 +1,8 @@
+.git
+.venv
+wandb
+models/
+outputs/
+__pycache__/
+datasets/
+config/

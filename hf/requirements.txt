@@ -1,0 +1,15 @@
+accelerate
+torchvision
+transformers>=4.25.1
+datasets
+ftfy
+tensorboard
+modelcards
+bitsandbytes==0.35.0
+gradio
+diffusers==0.12.0.dev0
+numpy
+torch
+bitsandbytes
+botocore
+--extra-index-url=https://packagecloud.io/github/git-lfs/pypi/simple
