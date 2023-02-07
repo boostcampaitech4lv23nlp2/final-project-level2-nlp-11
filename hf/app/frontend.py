@@ -33,6 +33,8 @@ def main() :
         st.session_state['model_select'] = ""
     if "remove_bg" not in st.session_state :
         st.session_state['remove_bg'] = False
+    if "image_style" not in st.session_state :
+        st.session_state['image_style'] = ""
     
     with left :
         st.markdown("## Text-to-Emoji")
@@ -132,16 +134,13 @@ def main() :
                     
                     st.markdown("##")
                     st.markdown("###### Remove Background")
-                    remove_bg = st.radio("", (False, True), label_visibility="collapsed")
+                    remove_bg = st.radio(" ", (False, True), label_visibility="collapsed")
                     if remove_bg != st.session_state['remove_bg'] :
                         st.session_state['remove_bg'] = remove_bg
                         st.experimental_rerun()
 
-                    
-                    # st.button("remove_background", on_click = )
-                    
 
-            
+
     with right :
 
         st.markdown("##### model select")
@@ -151,26 +150,34 @@ def main() :
             "한국어",),
             label_visibility="collapsed"
         )
+
+        st.markdown("##")
+        st.markdown("##### image style")
+        image_style = st.selectbox(
+            "image_style",
+            ("open-emoji","nato"),
+            label_visibility="collapsed"
+        )
         
         st.markdown("##")
-
         st.markdown("##### image size")
         output_option = st.selectbox(
             "image size",
             ("512","256","128"),
             label_visibility= "collapsed"
         )
-        st.markdown("##")
 
+        st.markdown("##")
         st.markdown("##### output count")
         num_inference = st.slider(" ",1,4,3,label_visibility="collapsed")
-        st.markdown("##")
 
+        st.markdown("##")
         st.markdown("##### cfg scale")
         guidance_scale = st.slider(" ",0, 50, 10,label_visibility="collapsed")
-        st.markdown("##")
+
 
         st.session_state['model_select'] = model_select
+        st.session_state['image_style'] = image_style
         st.session_state['output_size'] = int(output_option)
         st.session_state['num_inference'] = int(num_inference)
         st.session_state['guidance_scale'] = int(guidance_scale)
