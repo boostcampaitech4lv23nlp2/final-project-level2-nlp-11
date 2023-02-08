@@ -8,3 +8,4 @@ datasets/
 config/
 config/
 config/cfg_lora.yaml
+hf/datasets/

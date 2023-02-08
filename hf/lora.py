@@ -43,6 +43,7 @@ from diffusers import (
     DiffusionPipeline,
     StableDiffusionPipeline,
     UNet2DConditionModel,
+    AltDiffusionPipeline
 )
 from diffusers.loaders import AttnProcsLayers
 from diffusers.models.cross_attention import LoRACrossAttnProcessor
@@ -52,8 +53,12 @@ from diffusers.utils.import_utils import is_xformers_available
 from huggingface_hub import HfFolder, Repository, create_repo, whoami
 from torchvision import transforms
 from tqdm.auto import tqdm
-from transformers import CLIPTextModel, CLIPTokenizer
+from transformers import CLIPTextModel, CLIPTokenizer, AutoProcessor, AutoModel
 from omegaconf import OmegaConf
+from examples.AltCLIP.hf_altclip.modeling_altclip import AltCLIP
+from examples.AltCLIP.hf_altclip.processing_altclip import AltCLIPProcessor
+from examples.AltCLIP.hf_altclip.configuration_altclip import AltCLIPConfig
+# from pororo import Pororo
 
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.
 check_min_version("0.12.0.dev0")
@@ -478,16 +483,26 @@ def main():
     noise_scheduler = DDPMScheduler.from_pretrained(
         args.pretrained_model_name_or_path, subfolder="scheduler"
     )
-    tokenizer = CLIPTokenizer.from_pretrained(
-        args.pretrained_model_name_or_path,
-        subfolder="tokenizer",
-        revision=args.revision,
-    )
-    text_encoder = CLIPTextModel.from_pretrained(
-        args.pretrained_model_name_or_path,
-        subfolder="text_encoder",
-        revision=args.revision,
-    )
+
+    if args.pretrained_model_name_or_path == 'BAAI/AltDiffusion-m9':
+        text_encoder = AltCLIP.from_pretrained(
+            "BAAI/AltCLIP-m9"
+        )
+        # text_encoder = text_encoder.text_model
+        tokenizer = AltCLIPProcessor.from_pretrained(
+            "BAAI/AltCLIP-m9"
+        )
+    else:
+        tokenizer = CLIPTokenizer.from_pretrained(
+            args.pretrained_model_name_or_path,
+            subfolder="tokenizer",
+            revision=args.revision,
+        )
+        text_encoder = CLIPTextModel.from_pretrained(
+            args.pretrained_model_name_or_path,
+            subfolder="text_encoder",
+            revision=args.revision,
+        )
     vae = AutoencoderKL.from_pretrained(
         args.pretrained_model_name_or_path, subfolder="vae", revision=args.revision
     )
@@ -617,6 +632,16 @@ def main():
     # We need to tokenize inputs and targets.
     column_names = dataset["train"].column_names
 
+    #for change english text to Korean text
+    if args.pretrained_model_name_or_path == 'BAAI/AltDiffusion-m9':
+        ko_texts = []
+        with open('./train_text.txt', 'r') as file:
+            ko_texts = file.readlines()
+        ko_texts = [kt.replace('\n', '') for kt in ko_texts]
+        dataset['train'] = dataset['train'].remove_columns('text').add_column('text', ko_texts)
+    else:
+        pass
+
     # 6. Get the column names for input/target.
     dataset_columns = DATASET_NAME_MAPPING.get(args.dataset_name, None)
     if args.image_column is None:
@@ -654,13 +679,23 @@ def main():
                 raise ValueError(
                     f"Caption column `{caption_column}` should contain either strings or lists of strings."
                 )
-        inputs = tokenizer(
-            captions,
-            max_length=tokenizer.model_max_length,
-            padding="max_length",
-            truncation=True,
-            return_tensors="pt",
-        )
+        if args.pretrained_model_name_or_path == 'BAAI/AltDiffusion-m9':
+            inputs = tokenizer(
+                captions,
+                max_length=tokenizer.tokenizer.model_max_length,
+                padding="max_length",
+                truncation=True,
+                return_tensors="pt",
+            )
+        else:
+            inputs = tokenizer(
+                captions,
+                max_length=tokenizer.model_max_length,
+                padding="max_length",
+                truncation=True,
+                return_tensors="pt",
+            )
+
         return inputs.input_ids
 
     # Preprocessing the datasets.
@@ -840,10 +875,11 @@ def main():
                 # Add noise to the latents according to the noise magnitude at each timestep
                 # (this is the forward diffusion process)
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
-
                 # Get the text embedding for conditioning
-                encoder_hidden_states = text_encoder(batch["input_ids"])[0]
-
+                if args.pretrained_model_name_or_path == 'BAAI/AltDiffusion-m9':
+                    encoder_hidden_states = text_encoder.text_model(batch["input_ids"])['projection_state']
+                else:
+                    encoder_hidden_states = text_encoder(batch["input_ids"])[0]
                 # Get the target for loss depending on the prediction type
                 if noise_scheduler.config.prediction_type == "epsilon":
                     target = noise
@@ -897,12 +933,20 @@ def main():
                             f"load from {args.validation_prompt_path}."
                         )
                         # create pipeline
-                        pipeline = StableDiffusionPipeline.from_pretrained(
-                            args.pretrained_model_name_or_path,
-                            unet=accelerator.unwrap_model(unet),
-                            revision=args.revision,
-                            torch_dtype=weight_dtype,
-                        )
+                        if args.pretrained_model_name_or_path == 'BAAI/AltDiffusion-m9':
+                            pipeline = AltDiffusionPipeline.from_pretrained(
+                                args.pretrained_model_name_or_path,
+                                unet=accelerator.unwrap_model(unet),
+                                revision=args.revision,
+                                torch_dtype=weight_dtype,
+                            )
+                        else:
+                            pipeline = StableDiffusionPipeline.from_pretrained(
+                                args.pretrained_model_name_or_path,
+                                unet=accelerator.unwrap_model(unet),
+                                revision=args.revision,
+                                torch_dtype=weight_dtype,
+                            )
                         pipeline = pipeline.to(accelerator.device)
                         pipeline.set_progress_bar_config(disable=True)
 
@@ -950,12 +994,20 @@ def main():
                             f" {args.validation_prompt}."
                         )
                         # create pipeline
-                        pipeline = StableDiffusionPipeline.from_pretrained(
-                            args.pretrained_model_name_or_path,
-                            unet=accelerator.unwrap_model(unet),
-                            revision=args.revision,
-                            torch_dtype=weight_dtype,
-                        )
+                        if args.pretrained_model_name_or_path == 'BAAI/AltDiffusion-m9':
+                            pipeline = AltDiffusionPipeline.from_pretrained(
+                                args.pretrained_model_name_or_path,
+                                unet=accelerator.unwrap_model(unet),
+                                revision=args.revision,
+                                torch_dtype=weight_dtype,
+                            )
+                        else:
+                            pipeline = StableDiffusionPipeline.from_pretrained(
+                                args.pretrained_model_name_or_path,
+                                unet=accelerator.unwrap_model(unet),
+                                revision=args.revision,
+                                torch_dtype=weight_dtype,
+                            )
                         pipeline = pipeline.to(accelerator.device)
                         pipeline.set_progress_bar_config(disable=True)
 
@@ -1021,11 +1073,18 @@ def main():
 
     # Final inference
     # Load previous pipeline
-    pipeline = DiffusionPipeline.from_pretrained(
-        args.pretrained_model_name_or_path,
-        revision=args.revision,
-        torch_dtype=weight_dtype,
-    )
+    if args.pretrained_model_name_or_path == 'BAAI/AltDiffusion-m9':
+        pipeline = AltDiffusionPipeline.from_pretrained(
+            args.pretrained_model_name_or_path,
+            revision=args.revision,
+            torch_dtype=weight_dtype,
+        )
+    else:
+        pipeline = StableDiffusionPipeline.from_pretrained(
+            args.pretrained_model_name_or_path,
+            revision=args.revision,
+            torch_dtype=weight_dtype,
+        )
     pipeline = pipeline.to(accelerator.device)
 
     # load attention processors
