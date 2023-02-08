@@ -68,9 +68,10 @@ def main():
             
             st.session_state.save_parameter = data
             # 리퀘스트를 보낼 URL
-            response = requests.post("http://localhost:30001/eng_submit", json=data)
-
-            response = requests.post( "http://118.67.133.216:30001/eng_submit",json= data)
+            if st.session_state.model_select == "한국어" :
+                response = requests.post("http://localhost:30001/kor_submit", json=data)
+            else :
+                response = requests.post("http://localhost:30001/eng_submit", json=data)
 
             image_byte_list = response.json()["images"]
             remove_image_byte_list = response.json()["removes"]
@@ -99,9 +100,6 @@ def main():
 
             with st.container() :
                 image_col1 , image_col2 = st.columns([4,1])
-
-                print(image_col1.id)
-                
                 with image_col1 :
                     st.markdown(
                         """
