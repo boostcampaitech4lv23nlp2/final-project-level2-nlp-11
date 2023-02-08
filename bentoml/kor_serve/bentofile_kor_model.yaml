@@ -1,0 +1,12 @@
+service: "service.py:svc_kor"
+include:
+    - "service.py"
+    - "requirements.txt"
+    - "./models/2-1-base-test-inference"
+    - "configuration.yaml"
+python:
+    packages:
+        - torch
+        - transformers
+        - diffusers
+        - ftfy

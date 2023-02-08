@@ -1,0 +1,8 @@
+service: "service.py:svc_eng"
+include:
+    - "service.py"
+    - "requirements.txt"
+    - "models/"
+    - "configuration.yaml"
+python:
+    requirements_txt: "requirements.txt"
