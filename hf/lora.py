@@ -627,17 +627,19 @@ def main():
         )
         # See more about loading custom images at
         # https://huggingface.co/docs/datasets/v2.4.0/en/image_load#imagefolder
-
     # Preprocessing the datasets.
     # We need to tokenize inputs and targets.
     column_names = dataset["train"].column_names
-    # print('datset train', dataset['train']['text'])
+
     #for change english text to Korean text
-    mt = Pororo(task="translation", lang="multi")
-    ko_texts = []
-    for anno in dataset['train']['text']:
-        ko_texts.append(mt(anno, src='en', tgt='ko'))
-    dataset['train']['text'] = ko_texts
+    if args.pretrained_model_name_or_path == 'BAAI/AltDiffusion-m9':
+        ko_texts = []
+        with open('./train_text.txt', 'r') as file:
+            ko_texts = file.readlines()
+        ko_texts = [kt.replace('\n', '') for kt in ko_texts]
+        dataset['train'] = dataset['train'].remove_columns('text').add_column('text', ko_texts)
+    else:
+        pass
 
     # 6. Get the column names for input/target.
     dataset_columns = DATASET_NAME_MAPPING.get(args.dataset_name, None)
@@ -661,7 +663,6 @@ def main():
             raise ValueError(
                 f"--caption_column' value '{args.caption_column}' needs to be one of: {', '.join(column_names)}"
             )
-
     # Preprocessing the datasets.
     # We need to tokenize input captions and transform the images.
     def tokenize_captions(examples, is_train=True):

@@ -1,12 +1,22 @@
-import datasets
-#'imagefolder' <- 허깅페이스에서 만든 이미지 데이터셋 도우미? 라고 보면 될듯.
-dataset = datasets.load_dataset('imagefolder', data_dir='datasets/noto_sans',
-                                               split='train',
-                                               features=datasets.Features({
-                                                   'image':datasets.Image(),
-                                                   'text':datasets.Value('string')
-                                               }))
+from datasets import load_dataset
+from pororo import Pororo
+import chardet
+dataset = load_dataset('soypablo/Emoji_Dataset-Openmoji')
+dataset_text = dataset['train']['text']
 
-print(dataset['text'][:5])
-# 본인의 데이터셋이름과 본인의 토큰을 입력할 것.
-# dataset.push_to_hub('kuotient/noto-emoji-dataset',split='train', token="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")
+# print(dataset_text)
+ko_txt = []
+mt = Pororo(task="translation", lang="multi")
+for idx, en_txt in enumerate(dataset_text) :
+    print(en_txt.encode('utf-8', 'ignore').decode('utf-8') )
+    ko_text = mt(en_txt, src='en', tgt='ko')
+    ko_txt.append(ko_text)
+    # print(type(ko_text))
+    # print (chardet.detect (ko_text))
+    # print(ko_text
+    # .encode('utf-8', 'ignore').decode('utf-8'))
+    # ko_txt.append(mt(en_txt, src='en', tgt='ko'))
+    # print(ko_txt[idx])
+with open('train_text.txt', 'w') as file:
+    for kt in ko_txt:
+        file.write(kt + '\n')
