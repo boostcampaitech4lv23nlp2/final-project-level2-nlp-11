@@ -20,7 +20,7 @@
 
 ### Background
 
-- **Unicode**에 따르면, 전 세계 인구의 **92%**가 이모지를 사용합니다. ([링크](https://pumble.com/learn/communication/emoji-statistics-internal-communication/))
+- **Unicode**에 따르면, 전 세계 인구의 92%가 이모지를 사용합니다. ([링크](https://pumble.com/learn/communication/emoji-statistics-internal-communication/))
 - **2018년 기준**, **페이스북**에서 하루에 쓰이는 이모지의 갯수는 **50억개**에 달합니다. ([링크](https://blog.emojipedia.org/5-billion-emojis-sent-daily-on-messenger/))
 - **다섯개 중 하나** 이상의 **트윗**이 이모지를 포함하고 있고, 이 비율은 **점점 높아지고 있습니다.** ([링크](https://blog.emojipedia.org/top-emoji-trends-of-2021/))
 - **인스타그램** **댓글**의 **50%이상**이 이모지를 포함하고 있습니다.
@@ -85,6 +85,60 @@ Unicode상에 등재된 emoji는 3633개입니다.
 |                    Serving                     |       Metric 및 이론, 논문 조사        |           Front(Streamlit)            |            Serving(BENTOML)            |         Multi Encoder(AltCLIP-m9)          |
 |              데이터 제작 및 가공               |         프로젝트 기획 및 발표          |              Code Review              |          데이터 제작 및 가공           |           프로젝트 기획 및 발표            |
 | [GitHub](https://github.com/kuotient/kuotient) | [GitHub](https://github.com/gustn9609) | [GitHub](https://github.com/ggb04110) | [GitHub](https://github.com/soypabloo) | [GitHub](https://github.com/soohi0/soohi0) |
+
+## Project Directories
+```
+Relation_Extraction
+ ┣bentoml
+ ┃ ┣ eng_serve
+ ┃ ┃ ┣ bentofile_eng_model.yaml
+ ┃ ┃ ┣ configuration.yaml
+ ┃ ┃ ┣ requirements.txt
+ ┃ ┃ ┗ service.py
+ ┃ ┣ kor_serve
+ ┃ ┃ ┣ bentofile_kor_model.yaml
+ ┃ ┃ ┣ configuration.yaml
+ ┃ ┃ ┣ requirements.txt
+ ┃ ┃ ┗ service.py
+ ┃ ┣ bentofile_multilingual_model.yaml
+ ┃ ┣ configuration.yaml
+ ┃ ┣ readme.md
+ ┃ ┣ requirements.txt
+ ┃ ┗ service.py
+ ┣ frontend
+ ┃ ┣ .streamlit
+ ┃ ┃ ┗ config.toml
+ ┃ ┣ __main__.py
+ ┃ ┣ frontend.py
+ ┃ ┣ main.py
+ ┃ ┗ utils.py
+ ┣ train
+ ┃ ┣ dataset_utils
+ ┃ ┃ ┣ make_korean_datasets.py
+ ┃ ┃ ┗ save_dataset.py
+ ┃ ┣ dreambooth
+ ┃ ┃ ┣ dreambooth-lora.py
+ ┃ ┃ ┣ dreambooth-lora.sh
+ ┃ ┃ ┣ dreambooth.py
+ ┃ ┃ ┗ dreambooth.sh
+ ┃ ┣ examples
+ ┃ ┃ ┣ AltCLIP
+ ┃ ┃ ┗ AltDiffusion
+ ┃ ┣ inference
+ ┃ ┃ ┣ inference-lora-fid.py
+ ┃ ┃ ┣ inference-lora.py
+ ┃ ┃ ┗ inference_lora_altdiffusion.py
+ ┃ ┣ utils
+ ┃ ┃ ┣ blacklist.py
+ ┃ ┃ ┣ .
+ ┃ ┃ ┣ .
+ ┃ ┃ ┗ white_bg.py
+ ┃ ┣ train_lora.py
+ ┃ ┗ train_lora.sh
+ ┣ .gitignore
+ ┣ README.md
+ ┗ requirements.txt
+```
 
 <br>
 
