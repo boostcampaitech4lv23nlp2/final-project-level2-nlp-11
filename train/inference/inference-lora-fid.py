@@ -1007,7 +1007,7 @@ txt = ['shinto shrine',
  'woman detective',
  'woman construction worker: medium skin tone']
 model_path = "stabilityai/stable-diffusion-2-1-base"
-ckpt_path = "models/2-1-base-test-inference/checkpoint-54000"
+ckpt_path = "../models/2-1-base-test-inference/checkpoint-54000"
 pipe = StableDiffusionPipeline.from_pretrained(
     model_path,
     revision=None,

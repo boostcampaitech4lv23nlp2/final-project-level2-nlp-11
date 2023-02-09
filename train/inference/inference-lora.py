@@ -5,7 +5,7 @@ import time
 # user config
 torch.cuda.empty_cache()
 model_path = "stabilityai/stable-diffusion-2-1-base"
-ckpt_path = "models/2-1-base-test-inference/checkpoint-54000"
+ckpt_path = "../models/2-1-base-test-inference/checkpoint-54000"
 prompt = "A cute bunny rabbit"
 guidance_scale = 7
 

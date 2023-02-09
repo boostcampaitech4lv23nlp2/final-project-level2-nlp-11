@@ -4,7 +4,7 @@ import torch
 
 torch.cuda.empty_cache()
 model_path = "BAAI/AltDiffusion-m9"
-ckpt_path = "models/BAAI-AltDiffusion-2/checkpoint-100000"
+ckpt_path = "../models/BAAI-AltDiffusion-2/checkpoint-100000"
 pipe = AltDiffusionPipeline.from_pretrained(
     model_path,
     revision=None,
