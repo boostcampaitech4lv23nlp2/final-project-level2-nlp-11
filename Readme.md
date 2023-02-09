@@ -8,7 +8,7 @@
 
 ## Service URL
 
-[Service Link]()
+[Service Link](http://49.50.165.163:30002/)
 
 ## 시연 영상
 
