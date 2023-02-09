@@ -163,3 +163,5 @@ Relation_Extraction
 
 - huggingface/diffusers [[CODE]](https://github.com/huggingface/diffusers)
 - AltCLIP [[CODE]](https://github.com/flagai-open/flagai)
+
+![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1&height=200&section=footer)
