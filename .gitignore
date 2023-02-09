@@ -10,3 +10,4 @@ config/
 config/cfg_lora.yaml
 hf/datasets/
 hf/train_text.txt
+bento/
