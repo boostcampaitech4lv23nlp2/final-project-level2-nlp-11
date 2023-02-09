@@ -81,8 +81,9 @@ Unicode상에 등재된 emoji는 3633개입니다.
 
 |                     김지수                     |                 김현수                 |                지상수                 |                 최석훈                 |                   최혜원                   |
 | :--------------------------------------------: | :------------------------------------: | :-----------------------------------: | :------------------------------------: | :----------------------------------------: |
-|                    Modeling                    |                Modeling                |               Modeling                |            Modeling & data             |                  Modeling                  |
-|                Serving(HAPROXY)                |      Metric(FID) & DEIS Scheduler      |           Front(Streamlit)            |            Serving(BENTOML)            |           Korea Encoder(AltCLIP)           |
+|                    Modeling                    |                Modeling                |               Modeling                |                Modeling                |                  Modeling                  |
+|                    Serving                     |       Metric 및 이론, 논문 조사        |           Front(Streamlit)            |            Serving(BENTOML)            |         Multi Encoder(AltCLIP-m9)          |
+|              데이터 제작 및 가공               |         프로젝트 기획 및 발표          |              Code Review              |          데이터 제작 및 가공           |           프로젝트 기획 및 발표            |
 | [GitHub](https://github.com/kuotient/kuotient) | [GitHub](https://github.com/gustn9609) | [GitHub](https://github.com/ggb04110) | [GitHub](https://github.com/soypabloo) | [GitHub](https://github.com/soohi0/soohi0) |
 
 <br>
