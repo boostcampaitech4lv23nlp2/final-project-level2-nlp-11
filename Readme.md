@@ -10,7 +10,7 @@
 
 ## 시연 영상
 
-![캡쳐](https://user-images.githubusercontent.com/43758562/217693126-4a9a7359-b462-4a47-876e-4056fd8364c7.gif)
+<img src="https://user-images.githubusercontent.com/43758562/217693126-4a9a7359-b462-4a47-876e-4056fd8364c7.gif" width="60%" height="30%"/>
 
 <br>
 
@@ -34,7 +34,7 @@ Unicode상에 등재된 emoji는 3633개입니다.
 
 ### Emoji Samples
 
-![캡처](https://user-images.githubusercontent.com/43758562/217686443-6c25df44-ea48-44d9-b30a-7224c1390748.png)
+<img src="https://user-images.githubusercontent.com/43758562/217686443-6c25df44-ea48-44d9-b30a-7224c1390748.png" width="70%" height="70%"/>
 
 <br>
 
@@ -58,18 +58,17 @@ Unicode상에 등재된 emoji는 3633개입니다.
 
 ### Model FlowChart
 
-![캡처](https://user-images.githubusercontent.com/43758562/217688705-3740b46c-dfe9-4b38-ae76-daf0e9237474.png)
+<img src="https://user-images.githubusercontent.com/43758562/217688705-3740b46c-dfe9-4b38-ae76-daf0e9237474.png" width="70%" height="70%"/>
 
 ### Server FlowChart
 
-![캡처](https://user-images.githubusercontent.com/43758562/217688927-0febeae5-61b8-4014-be4a-0d7aaa3a2a1b.png)
-![캡처](https://user-images.githubusercontent.com/43758562/217688936-e44c35de-574f-4880-8be1-15b1412bf396.png)
+<img src="https://user-images.githubusercontent.com/43758562/217688927-0febeae5-61b8-4014-be4a-0d7aaa3a2a1b.png" width="49%" height="49%"/> <img src="https://user-images.githubusercontent.com/43758562/217688936-e44c35de-574f-4880-8be1-15b1412bf396.png" width="49%" height="49%"/>
 
 <br>
 
 ## Team
 
-![캡처](https://user-images.githubusercontent.com/43758562/217689917-80c307d7-512b-451f-a0ac-4992cb234dff.png)
+<img src="https://user-images.githubusercontent.com/43758562/217689917-80c307d7-512b-451f-a0ac-4992cb234dff.png" width="70%" height="70%"/>
 
 - **서로 다른 조**에서 **multimodal**에 관심 있는 **우리**들이 모여서, **(FUSION)**
 - 각자 아는 지식들을 **공유하고 융합**하여, **(FUSION)**
@@ -87,7 +86,7 @@ Unicode상에 등재된 emoji는 3633개입니다.
 ## Project Directories
 ```
 Relation_Extraction
- ┣bentoml
+ ┣ bentoml
  ┃ ┣ eng_serve
  ┃ ┃ ┣ bentofile_eng_model.yaml
  ┃ ┃ ┣ configuration.yaml
