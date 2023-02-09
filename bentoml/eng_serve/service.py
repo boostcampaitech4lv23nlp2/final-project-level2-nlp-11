@@ -2,8 +2,6 @@ import torch
 from torch import autocast
 from diffusers import StableDiffusionPipeline, DEISMultistepScheduler
 
-# from diffusers import StableDiffusionImg2ImgPipeline
-
 import bentoml
 from PIL import Image
 from bentoml.io import Image, JSON
@@ -31,7 +29,6 @@ class UserInput(BaseModel):
         size: Optional[int] = 512 <- 이미지 사이즈 설정
         num_inference_steps: Optional[int] = 30 <- 추론 스텝 조정
         num_images_per_prompt: Optional[int] = 1 <- 출력할 이미지의 개수
-
     """
 
     model: str = "openmoji"  # 사용할 모델의 이름
