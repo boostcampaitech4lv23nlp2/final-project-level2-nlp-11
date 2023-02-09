@@ -10,23 +10,9 @@
 
 [Service Link]()
 
-<br>
+## 시연 영상
 
-## Team
-
-![캡처](https://user-images.githubusercontent.com/43758562/217689917-80c307d7-512b-451f-a0ac-4992cb234dff.png)
-
-- **서로 다른 조**에서 **multimodal**에 관심 있는 **우리**들이 모여서, **(FUSION)**
-- 각자 아는 지식들을 **공유하고 융합**하여, **(FUSION)**
-- **diffusion**을 활용해 **text-to-emoji** 문제를 풀어보자! **(FUSION)**
-
-**We, Fusion!!**
-
-|                     김지수                     |                 김현수                 |                지상수                 |                 최석훈                 |                   최혜원                   |
-| :--------------------------------------------: | :------------------------------------: | :-----------------------------------: | :------------------------------------: | :----------------------------------------: |
-|                    Modeling                    |                Modeling                |               Modeling                |            Modeling & data             |                  Modeling                  |
-|                Serving(HAPROXY)                |      Metric(FID) & DEIS Scheduler      |           Front(Streamlit)            |            Serving(BENTOML)            |           Korea Encoder(AltCLIP)           |
-| [GitHub](https://github.com/kuotient/kuotient) | [GitHub](https://github.com/gustn9609) | [GitHub](https://github.com/ggb04110) | [GitHub](https://github.com/soypabloo) | [GitHub](https://github.com/soohi0/soohi0) |
+![캡쳐](https://user-images.githubusercontent.com/43758562/217693126-4a9a7359-b462-4a47-876e-4056fd8364c7.gif)
 
 <br>
 
@@ -53,7 +39,22 @@ Unicode상에 등재된 emoji는 3633개입니다.
 ![캡처](https://user-images.githubusercontent.com/43758562/217686443-6c25df44-ea48-44d9-b30a-7224c1390748.png)
 
 <br>
-<br>
+
+## Dataset
+
+### Openmoji
+
+- **Openmoji**는 **CC BY-SA 4.0** 라이센스 하에 자유롭게 사용할 수 있는 **오픈 소스** 이모지 플랫폼 입니다.
+- Unicode에 등재된 **3633**개의 이모지를 포함하여 총 **4083**개의 이모지를 제공합니다.
+- 해당 플랫폼에서 제공하는 데이터를 활용하여 이미지-텍스트 쌍을 만들어 허깅페이스 허브에 배포하여 사용하였습니다.
+- HuggingFace 에 [Openmoji dataset](https://openmoji.org/)을 업로드하였습니다.([링크](https://huggingface.co/datasets/soypablo/Emoji_Dataset-Openmoji))
+
+### noto-emoji
+
+- **Noto emoji**는 구글이 제작한 **Open Font License 1.1** 하에 자유롭게 사용할 수 있는 **오픈소스 이모지 라이브러리** 입니다.
+- Unicode에 등재된 3,633개의 이모지 png파일을 제공합니다.
+- 해당 플랫폼에서 제공하는 데이터를 활용하여 이미지-텍스트 쌍을 만들어 허깅페이스 허브에 배포하여 사용하였습니다.
+- HuggingFace 에 [noto-emoji dataset](https://github.com/googlefonts/noto-emoji)을 업로드하였습니다.([링크](https://huggingface.co/datasets/kuotient/noto-emoji-dataset))
 
 ## FlowChart
 
@@ -65,6 +66,24 @@ Unicode상에 등재된 emoji는 3633개입니다.
 
 ![캡처](https://user-images.githubusercontent.com/43758562/217688927-0febeae5-61b8-4014-be4a-0d7aaa3a2a1b.png)
 ![캡처](https://user-images.githubusercontent.com/43758562/217688936-e44c35de-574f-4880-8be1-15b1412bf396.png)
+
+<br>
+
+## Team
+
+![캡처](https://user-images.githubusercontent.com/43758562/217689917-80c307d7-512b-451f-a0ac-4992cb234dff.png)
+
+- **서로 다른 조**에서 **multimodal**에 관심 있는 **우리**들이 모여서, **(FUSION)**
+- 각자 아는 지식들을 **공유하고 융합**하여, **(FUSION)**
+- **diffusion**을 활용해 **text-to-emoji** 문제를 풀어보자! **(FUSION)**
+
+**We, Fusion!!**
+
+|                     김지수                     |                 김현수                 |                지상수                 |                 최석훈                 |                   최혜원                   |
+| :--------------------------------------------: | :------------------------------------: | :-----------------------------------: | :------------------------------------: | :----------------------------------------: |
+|                    Modeling                    |                Modeling                |               Modeling                |            Modeling & data             |                  Modeling                  |
+|                Serving(HAPROXY)                |      Metric(FID) & DEIS Scheduler      |           Front(Streamlit)            |            Serving(BENTOML)            |           Korea Encoder(AltCLIP)           |
+| [GitHub](https://github.com/kuotient/kuotient) | [GitHub](https://github.com/gustn9609) | [GitHub](https://github.com/ggb04110) | [GitHub](https://github.com/soypabloo) | [GitHub](https://github.com/soohi0/soohi0) |
 
 <br>
 
@@ -83,8 +102,13 @@ Unicode상에 등재된 emoji는 3633개입니다.
 
 ### Paper
 
+- Denoising Diffusion Probabilistic Models [[PAPER]](https://arxiv.org/abs/2006.11239)
 - AltCLIP: Altering the Language Encoder in CLIP for Extended Language Capabilities [[PAPER]](https://arxiv.org/pdf/2211.06679v2.pdf) [[CODE]](https://github.com/flagai-open/flagai)
+- LoRA: Low-Rank Adaptation of Large Language Models [[PAPER]](https://arxiv.org/abs/2106.09685)
+- BLIP: Bootstrapping Language-Image Pre-training for Unified
+  Vision-Language Understanding and Generation [[PAPER]](https://arxiv.org/abs/2201.12086)
 
 ### Open Source
 
+- huggingface/diffusers [[CODE]](https://github.com/huggingface/diffusers)
 - AltCLIP [[CODE]](https://github.com/flagai-open/flagai)
