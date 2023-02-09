@@ -1,6 +1,8 @@
 ![header](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1&height=250&section=header&text=어떤%20이모지를%20갖고%20싶어?%20Text-to-Emoji!&fontSize=40)
 
-<br>
+<img src="https://img.shields.io/badge/python-3776AB?style=flat&logo=python&logoColor=white"/> <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=PyTorch&logoColor=white"/>    
+<img src="https://img.shields.io/badge/streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white"/> <img src="https://img.shields.io/badge/FastAPI-009688?style=flat&logo=FastAPI&logoColor=white"/> <img src="https://img.shields.io/badge/BentoML-E9568E?style=flat&logo=BentoML&logoColor=white"/> <img src="https://img.shields.io/badge/HAProxy-02458D?style=flat&logo=HAProxy&logoColor=white"/>
+
 
 ## Service URL
 
