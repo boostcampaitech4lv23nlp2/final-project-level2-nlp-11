@@ -2,8 +2,6 @@ import torch
 from torch import autocast
 from diffusers import StableDiffusionPipeline, DEISMultistepScheduler
 
-# from diffusers import StableDiffusionImg2ImgPipeline
-
 import bentoml
 from PIL import Image
 from bentoml.io import Image, JSON
@@ -13,6 +11,7 @@ from fastapi import FastAPI, Response
 import base64
 from io import BytesIO
 from typing import Optional
+
 from rembg import remove
 
 server_check = 0
@@ -21,17 +20,17 @@ fastapi_app = FastAPI()
 
 class UserInput(BaseModel):
     """**유저가 보낸 Response입니다.**
-
     Args:
         다음과 같은 attribute를 사용할 수 있습니다.
-        prompt: str = "a cute bunny rabbit"
-        guidance_scale: Optional[float] = 15
-        size: Optional[int] = 512
-        num_inference_steps: Optional[int] = 30
-        num_images_per_prompt: Optional[int] = 1
-
+        model: str = "openmoji" <- 사용할 모델의 이름
+        prompt: str = "a cute bunny rabbit" <- 입력받을 프롬프트
+        guidance_scale: Optional[float] = 15 <- 이미지의 scale 설정
+        size: Optional[int] = 512 <- 이미지 사이즈 설정
+        num_inference_steps: Optional[int] = 30 <- 추론 스텝 조정
+        num_images_per_prompt: Optional[int] = 1 <- 출력할 이미지의 개수
     """
 
+    model: str = "openmoji"  # 사용할 모델의 이름
     prompt: str = "a cute bunny rabbit"
     guidance_scale: Optional[float] = 15
     size: Optional[int] = 512
@@ -45,7 +44,7 @@ class StableDiffusionRunnable(bentoml.Runnable):
 
     def __init__(self):
         pretrained_model_path = "stabilityai/stable-diffusion-2-1-base"
-        ckpt_path = "models/eng_model"
+        ckpt_path = "models/openmoji"
         self.device = "cuda"
         txt2img_pipe = StableDiffusionPipeline.from_pretrained(
             pretrained_model_path,
@@ -59,17 +58,20 @@ class StableDiffusionRunnable(bentoml.Runnable):
         self.__name__ = "Stable_Diffusion_Runnable"
 
     @bentoml.Runnable.method(batchable=False, batch_dim=0)
-    def txt2img(self, input_data: JSON) -> JSON:
+    def txt2img(self, input_data: JSON) -> dict:
         """**유저 인풋을 입력받아 txt2img_pipe에 inference하는 함수입니다.**
-
         Args:
             input_data (JSON): 유저의 인풋입니다.
-
         Returns:
-            JSON: base64형태로 인코딩된 이미지정보가 담긴 JSON을 리턴합니다.
+            dict: base64형태로 인코딩된 이미지정보가 담긴 dict을 리턴합니다.
+            이 dict는 자동으로 JSON으로 변환되어 Response하게 됩니다.
         """
         global server_check
-        # server_check = 0
+        # 현재 gpu가 사용중으로 상태 변경.
+        server_check = 1
+        # model 변경 하기.
+        print(f"{input_data.model}을 적용합니다.")
+        self.txt2img_pipe.unet.load_attn_procs(f"models/{input_data.model}")
         prompt = input_data.prompt
         guidance_scale = input_data.guidance_scale
         size = input_data.size
@@ -82,13 +84,11 @@ class StableDiffusionRunnable(bentoml.Runnable):
                 num_inference_steps=num_inference_steps,
                 num_images_per_prompt=num_images_per_prompt,
             ).images
-        # TODO: 배경제거 기능 추가하기.
+
         def to_base64(image: Image) -> str:
             """**Image 리스트를 Json형태로 보내기 위해 Base64포맷으로 전환합니다.**
-
             Args:
                 image (Image): Json형태로 전환할 이미지.
-
             Returns:
                 str: Base64형태로 전환된 문자열.
             """
@@ -96,11 +96,16 @@ class StableDiffusionRunnable(bentoml.Runnable):
                 image.save(output, format="PNG")
                 return base64.b64encode(output.getvalue()).decode("utf-8")
 
-        # server_check = 1 <- this is code(서버가 사용가능함으로 전환.)
-        #
+        server_check = 0  # 서버가 사용가능함으로 전환.
+
         return {
-            i: to_base64(remove(image.resize((size, size))))
-            for i, image in enumerate(images)
+            "images": [
+                to_base64(image.resize((size, size))) for _, image in enumerate(images)
+            ],
+            "removes": [
+                to_base64(remove(image.resize((size, size))))
+                for _, image in enumerate(images)
+            ],
         }
 
 
@@ -111,7 +116,7 @@ eng_emoji_diffusion_runner = bentoml.Runner(
 )
 # make service
 svc_eng = bentoml.Service("eng_emoji_diffusion", runners=[eng_emoji_diffusion_runner])
-# fastapi와 포트를 연결할 수 있도록 마운트해주는 함수
+# fastapi와 포트를 연결할 수 있도록 마운트합니다.
 svc_eng.mount_asgi_app(fastapi_app)
 
 # 영어 텍스트인풋을 제공받는 path
@@ -129,8 +134,8 @@ def eng2img(input_data: JSON) -> JSON:
     \n
     Returns:
         JSON: Base64형태로 포매팅된 이미지를 JSON형태로 리턴합니다.
-        attribute는 유저의 이미지 출력 개수 요청에 따라 0~3의 값을 가집니다.
-        value는 Base64형태로 포매팅된 문자열입니다.
+        attribute는 images, removes 두 개로 구성되어 있으며,
+        value는 둘다 Base64형태로 포매팅된 문자열 리스트를 반환 합니다.
     """
     return eng_emoji_diffusion_runner.txt2img.run(input_data)
 
