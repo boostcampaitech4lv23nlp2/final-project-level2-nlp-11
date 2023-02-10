@@ -6,7 +6,7 @@
 
 ## Service URL
 
-[Service Link](http://49.50.165.163:30002/)
+[Service Link](https://text-to-emoji.streamlit.app/)
 
 ## 시연 영상
 
