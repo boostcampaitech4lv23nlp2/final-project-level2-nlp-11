@@ -1,18 +1,16 @@
-# 어떤 이모지를 갖고 싶어? Text-to-Emoji!
+![header](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1&height=250&section=header&text=어떤%20이모지를%20갖고%20싶어?%20Text-to-Emoji!&fontSize=40)
 
-<!-- <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white"> <img src="https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=Jupyter&logoColor=white">
-<img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=PyTorch&logoColor=white">
-<img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white"><img src="https://raw.githubusercontent.com/bentoml/BentoML/main/docs/source/_static/img/bentoml-readme-header.jpeg"> -->
+<img src="https://img.shields.io/badge/python-3776AB?style=flat&logo=python&logoColor=white"/> <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=PyTorch&logoColor=white"/>    
+<img src="https://img.shields.io/badge/streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white"/> <img src="https://img.shields.io/badge/FastAPI-009688?style=flat&logo=FastAPI&logoColor=white"/> <img src="https://img.shields.io/badge/BentoML-E9568E?style=flat&logo=BentoML&logoColor=white"/> <img src="https://img.shields.io/badge/HAProxy-02458D?style=flat&logo=HAProxy&logoColor=white"/>
 
-<br>
 
 ## Service URL
 
-[Service Link](http://49.50.165.163:30002/)
+[Service Link](https://text-to-emoji.streamlit.app/)
 
 ## 시연 영상
 
-![캡쳐](https://user-images.githubusercontent.com/43758562/217693126-4a9a7359-b462-4a47-876e-4056fd8364c7.gif)
+<img src="https://user-images.githubusercontent.com/43758562/217693126-4a9a7359-b462-4a47-876e-4056fd8364c7.gif" width="60%" height="30%"/>
 
 <br>
 
@@ -20,7 +18,7 @@
 
 ### Background
 
-- **Unicode**에 따르면, 전 세계 인구의 **92%**가 이모지를 사용합니다. ([링크](https://pumble.com/learn/communication/emoji-statistics-internal-communication/))
+- **Unicode**에 따르면, 전 세계 인구의 92%가 이모지를 사용합니다. ([링크](https://pumble.com/learn/communication/emoji-statistics-internal-communication/))
 - **2018년 기준**, **페이스북**에서 하루에 쓰이는 이모지의 갯수는 **50억개**에 달합니다. ([링크](https://blog.emojipedia.org/5-billion-emojis-sent-daily-on-messenger/))
 - **다섯개 중 하나** 이상의 **트윗**이 이모지를 포함하고 있고, 이 비율은 **점점 높아지고 있습니다.** ([링크](https://blog.emojipedia.org/top-emoji-trends-of-2021/))
 - **인스타그램** **댓글**의 **50%이상**이 이모지를 포함하고 있습니다.
@@ -36,7 +34,7 @@ Unicode상에 등재된 emoji는 3633개입니다.
 
 ### Emoji Samples
 
-![캡처](https://user-images.githubusercontent.com/43758562/217686443-6c25df44-ea48-44d9-b30a-7224c1390748.png)
+<img src="https://user-images.githubusercontent.com/43758562/217686443-6c25df44-ea48-44d9-b30a-7224c1390748.png" width="70%" height="70%"/>
 
 <br>
 
@@ -60,18 +58,17 @@ Unicode상에 등재된 emoji는 3633개입니다.
 
 ### Model FlowChart
 
-![캡처](https://user-images.githubusercontent.com/43758562/217688705-3740b46c-dfe9-4b38-ae76-daf0e9237474.png)
+<img src="https://user-images.githubusercontent.com/43758562/217688705-3740b46c-dfe9-4b38-ae76-daf0e9237474.png" width="70%" height="70%"/>
 
 ### Server FlowChart
 
-![캡처](https://user-images.githubusercontent.com/43758562/217688927-0febeae5-61b8-4014-be4a-0d7aaa3a2a1b.png)
-![캡처](https://user-images.githubusercontent.com/43758562/217688936-e44c35de-574f-4880-8be1-15b1412bf396.png)
+<img src="https://user-images.githubusercontent.com/43758562/217688927-0febeae5-61b8-4014-be4a-0d7aaa3a2a1b.png" width="49%" height="49%"/> <img src="https://user-images.githubusercontent.com/43758562/217688936-e44c35de-574f-4880-8be1-15b1412bf396.png" width="49%" height="49%"/>
 
 <br>
 
 ## Team
 
-![캡처](https://user-images.githubusercontent.com/43758562/217689917-80c307d7-512b-451f-a0ac-4992cb234dff.png)
+<img src="https://user-images.githubusercontent.com/43758562/217689917-80c307d7-512b-451f-a0ac-4992cb234dff.png" width="70%" height="70%"/>
 
 - **서로 다른 조**에서 **multimodal**에 관심 있는 **우리**들이 모여서, **(FUSION)**
 - 각자 아는 지식들을 **공유하고 융합**하여, **(FUSION)**
@@ -85,6 +82,60 @@ Unicode상에 등재된 emoji는 3633개입니다.
 |                    Serving                     |       Metric 및 이론, 논문 조사        |           Front(Streamlit)            |            Serving(BENTOML)            |         Multi Encoder(AltCLIP-m9)          |
 |              데이터 제작 및 가공               |         프로젝트 기획 및 발표          |              Code Review              |          데이터 제작 및 가공           |           프로젝트 기획 및 발표            |
 | [GitHub](https://github.com/kuotient/kuotient) | [GitHub](https://github.com/gustn9609) | [GitHub](https://github.com/ggb04110) | [GitHub](https://github.com/soypabloo) | [GitHub](https://github.com/soohi0/soohi0) |
+
+## Project Directories
+```
+Relation_Extraction
+ ┣ bentoml
+ ┃ ┣ eng_serve
+ ┃ ┃ ┣ bentofile_eng_model.yaml
+ ┃ ┃ ┣ configuration.yaml
+ ┃ ┃ ┣ requirements.txt
+ ┃ ┃ ┗ service.py
+ ┃ ┣ kor_serve
+ ┃ ┃ ┣ bentofile_kor_model.yaml
+ ┃ ┃ ┣ configuration.yaml
+ ┃ ┃ ┣ requirements.txt
+ ┃ ┃ ┗ service.py
+ ┃ ┣ bentofile_multilingual_model.yaml
+ ┃ ┣ configuration.yaml
+ ┃ ┣ readme.md
+ ┃ ┣ requirements.txt
+ ┃ ┗ service.py
+ ┣ frontend
+ ┃ ┣ .streamlit
+ ┃ ┃ ┗ config.toml
+ ┃ ┣ __main__.py
+ ┃ ┣ frontend.py
+ ┃ ┣ main.py
+ ┃ ┗ utils.py
+ ┣ train
+ ┃ ┣ dataset_utils
+ ┃ ┃ ┣ make_korean_datasets.py
+ ┃ ┃ ┗ save_dataset.py
+ ┃ ┣ dreambooth
+ ┃ ┃ ┣ dreambooth-lora.py
+ ┃ ┃ ┣ dreambooth-lora.sh
+ ┃ ┃ ┣ dreambooth.py
+ ┃ ┃ ┗ dreambooth.sh
+ ┃ ┣ examples
+ ┃ ┃ ┣ AltCLIP
+ ┃ ┃ ┗ AltDiffusion
+ ┃ ┣ inference
+ ┃ ┃ ┣ inference-lora-fid.py
+ ┃ ┃ ┣ inference-lora.py
+ ┃ ┃ ┗ inference_lora_altdiffusion.py
+ ┃ ┣ utils
+ ┃ ┃ ┣ blacklist.py
+ ┃ ┃ ┣ .
+ ┃ ┃ ┣ .
+ ┃ ┃ ┗ white_bg.py
+ ┃ ┣ train_lora.py
+ ┃ ┗ train_lora.sh
+ ┣ .gitignore
+ ┣ README.md
+ ┗ requirements.txt
+```
 
 <br>
 
@@ -113,3 +164,5 @@ Unicode상에 등재된 emoji는 3633개입니다.
 
 - huggingface/diffusers [[CODE]](https://github.com/huggingface/diffusers)
 - AltCLIP [[CODE]](https://github.com/flagai-open/flagai)
+
+![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1&height=200&section=footer)
