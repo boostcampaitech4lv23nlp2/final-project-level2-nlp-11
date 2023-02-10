@@ -5,11 +5,7 @@
 폴더는 다음과 같은 구조를 가지고 있습니다.
 '''
 📦bentoml
-┣ 📂**pycache**
-┃ ┗ 📜service.cpython-310.pyc
 ┣ 📂eng_serve
-┃ ┣ 📂**pycache**
-┃ ┃ ┗ 📜service.cpython-310.pyc
 ┃ ┣ 📂models
 ┃ ┃ ┣ 📂notoemoji
 ┃ ┃ ┃ ┣ 📜custom_checkpoint_0.pkl
@@ -32,8 +28,6 @@
 ┃ ┣ 📜requirements.txt
 ┃ ┗ 📜service.py
 ┣ 📂kor_serve
-┃ ┣ 📂**pycache**
-┃ ┃ ┗ 📜service.cpython-310.pyc
 ┃ ┣ 📂models
 ┃ ┃ ┗ 📂openmoji
 ┃ ┃ ┃ ┣ 📜custom_checkpoint_0.pkl

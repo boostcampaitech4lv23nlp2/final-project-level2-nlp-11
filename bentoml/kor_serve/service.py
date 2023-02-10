@@ -126,6 +126,7 @@ def kor2img(input_data: JSON) -> JSON:
     Args:
         input_data (JSON): 사용자의 Request입니다. 다음과 같은 attribute가 존재합니다.
         다음과 같은 attribute를 사용할 수 있습니다.
+        model: str = "openmoji" <- 사용할 모델의 이름
         prompt: str = "a cute bunny rabbit"
         guidance_scale: Optional[float] = 15
         size: Optional[int] = 512
