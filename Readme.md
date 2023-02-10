@@ -10,7 +10,7 @@
 
 ## 시연 영상
 
-<img src="https://user-images.githubusercontent.com/43758562/217693126-4a9a7359-b462-4a47-876e-4056fd8364c7.gif" width="60%" height="30%"/>
+<img src="https://user-images.githubusercontent.com/43758562/218053996-35bd2ae8-200d-4348-be7f-c8541db73cfa.gif" width="60%" height="60%"/>
 
 <br>
 
