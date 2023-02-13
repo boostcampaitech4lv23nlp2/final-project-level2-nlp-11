@@ -97,15 +97,8 @@ Relation_Extraction
  ┃ ┃ ┣ configuration.yaml
  ┃ ┃ ┣ requirements.txt
  ┃ ┃ ┗ service.py
- ┃ ┣ bentofile_multilingual_model.yaml
- ┃ ┣ configuration.yaml
  ┃ ┣ readme.md
- ┃ ┣ requirements.txt
- ┃ ┗ service.py
  ┣ frontend
- ┃ ┣ .streamlit
- ┃ ┃ ┗ config.toml
- ┃ ┣ __main__.py
  ┃ ┣ frontend.py
  ┃ ┣ main.py
  ┃ ┗ utils.py
