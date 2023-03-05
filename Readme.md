@@ -6,7 +6,7 @@
 
 ## Service URL
 
-[Service Link](https://text-to-emoji.streamlit.app/)
+[Service Link](https://text-to-emoji.streamlit.app/)(Deprecated, 아래 영상을 참조하세요.)
 
 ## 시연 영상
 
